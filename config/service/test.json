@@ -1,0 +1,19 @@
+{
+    "service_map" : {
+        "default" : {
+            "host" : "http://test.com"
+        }
+    },
+    "code_key" : "code",
+    "success_code" : "0",
+    "message_key" : "status",
+    "data_key" : "data",
+    "api_list" : [
+        {
+            "name" : "abc_def",
+            "path" : "abc/def",
+            "method" : "GET",
+            "content_type": ""
+        }
+    ]
+}
