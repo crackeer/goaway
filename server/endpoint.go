@@ -1,24 +1,40 @@
 package server
 
 import (
+	"context"
+	"fmt"
+
+	"github.com/crackeer/go-gateway/container"
 	"github.com/crackeer/go-gateway/server/handler"
+	giner "github.com/crackeer/gopkg/gin"
 	"github.com/gin-gonic/gin"
 )
 
-func initEndpoint() *gin.Engine {
+// Run
+//
+//	@param ctx
+func Run(ctx context.Context, port int64) error {
+	engine := newGinEngine()
+	addRouterHandler(engine)
+	return engine.Run(fmt.Sprintf(":%d", port))
+}
+
+func newGinEngine() *gin.Engine {
 	router := gin.New()
 	router.RedirectFixedPath = false
 	router.RedirectTrailingSlash = false
-	setupInternal(router)
 	return router
 }
 
-// setupInternal
+// addRouterHandler ...
 //
 //	@param router
-func setupInternal(router *gin.Engine) {
+func addRouterHandler(router *gin.Engine) {
 	if router == nil {
 		return
 	}
-	router.NoRoute(handler.Handle)
+	router.Use(giner.DoResponseJSON())
+	appConfig := container.GetAppConfig()
+	routerFactory := container.GetRouterFactory()
+	router.NoRoute(handler.NewRouterHander(appConfig.Env, routerFactory, container.GetAPIFacory(), container.GetLogger(container.LogTypeAPI)))
 }

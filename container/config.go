@@ -5,22 +5,40 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-type config struct {
-	Env  string `env:"ENV"`
-	Port int64  `env:"PORT"`
+type AppConfig struct {
+	Env          string `env:"ENV"`
+	Port         int64  `env:"PORT"`
+	ConfigDriver string `env:"CONFIG_DRIVER"`
+	RouterDir    string `env:"ROUTER_DIR"`
+	APIDir       string `env:"API_DIR"`
+
+	LogDir       string `env:"LOG_DIR"`
+	SyncInterval int64  `env:"SYNC_INTERVAL"`
+
+	Debug bool `env:"DEBUG"`
 }
 
 var (
 	// AppConfig ...
-	Config *config
+	config *AppConfig
 )
 
-// InitConfig ...
-func InitConfig() error {
-	cfg := &config{}
+// InitAppConfig  ...
+//
+//	@return *AppConfig
+//	@return error
+func InitAppConfig() (*AppConfig, error) {
+	cfg := &AppConfig{}
 	if err := env.Parse(cfg); err != nil {
-		return err
+		return nil, err
 	}
-	Config = cfg
-	return nil
+	config = cfg
+	return config, nil
+}
+
+// GetAppConfig ...
+//
+//	@return *AppConfig
+func GetAppConfig() *AppConfig {
+	return config
 }

@@ -1,0 +1,16 @@
+{
+    "service_map" : {
+        "default" : {
+            "host" : "https://tenapi.cn"
+        }
+    },
+    "data_key" : "",
+    "api_list" : [
+        {
+            "name" : "v2_yiyan",
+            "path" : "v2/yiyan",
+            "method" : "GET",
+            "content_type": ""
+        }
+    ]
+}
