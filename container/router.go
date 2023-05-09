@@ -1,35 +1,37 @@
 package container
 
 import (
-	"fmt"
+	"net/http"
 
-	"github.com/crackeer/gopkg/router"
-	"github.com/crackeer/gopkg/router/api"
-)
-
-var (
-	routerFactory router.RouterFactory
-	apiFactory    api.APIFactory
+	api "github.com/crackeer/simple_http"
 )
 
 // InitRouterFactory
 //
 //	@param cfg
 func InitRouterFactory(cfg *AppConfig) error {
-	factory1, err := router.NewFileRouter(cfg.RouterDir)
-	if err != nil {
-		return fmt.Errorf("init router factory error: %v", err.Error())
-	}
-	routerFactory = factory1
-	factory2, _ := api.NewJSONAPI(cfg.APIDir)
-	apiFactory = factory2
 	return nil
 }
 
-func GetAPIFacory() api.APIFactory {
-	return apiFactory
-}
-
-func GetRouterFactory() router.RouterFactory {
-	return routerFactory
+// InitAPI
+//
+//	@param cfg
+//	@return error
+func InitAPI(cfg *AppConfig) error {
+	api.RegisterServiceAPI("abc/test", &api.ServiceAPI{
+		Host:           "https://www.boredapi.com",
+		DisableExtract: true,
+		SignType:       "test",
+		SignConfig: map[string]interface{}{
+			"ak": "22",
+		},
+		Path:    "api/activity",
+		Method:  http.MethodGet,
+		Timeout: 3000,
+	})
+	err := api.RegisterLuaSignByFile("test", "./config/sign/test.lua")
+	if err != nil {
+		panic(err.Error())
+	}
+	return nil
 }

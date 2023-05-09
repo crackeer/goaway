@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/crackeer/go-gateway/container"
 	"github.com/crackeer/go-gateway/server/handler"
 	giner "github.com/crackeer/gopkg/gin"
 	"github.com/gin-gonic/gin"
@@ -34,7 +33,6 @@ func addRouterHandler(router *gin.Engine) {
 		return
 	}
 	router.Use(giner.DoResponseJSON())
-	appConfig := container.GetAppConfig()
-	routerFactory := container.GetRouterFactory()
-	router.NoRoute(handler.NewRouterHander(appConfig.Env, routerFactory, container.GetAPIFacory(), container.GetLogger(container.LogTypeAPI)))
+	router.Any("proxy/*api", handler.Proxy)
+	router.NoRoute(handler.Handle)
 }

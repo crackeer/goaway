@@ -31,26 +31,7 @@ loop:
 			break loop
 		case <-ticker.C:
 			ticker.Stop()
-			startTime := time.Now().Unix()
-			err := routerFactory.LoadAll()
-			log := map[string]interface{}{
-				"cost": time.Now().Unix() - startTime,
-			}
-			if err != nil {
-				log["error"] = err.Error()
-			}
-			Log(log, "SyncRouterOnce")
-
-			startTime = time.Now().Unix()
-
-			err = apiFactory.LoadAll()
-			log = map[string]interface{}{
-				"cost": time.Now().Unix() - startTime,
-			}
-			if err != nil {
-				log["error"] = err.Error()
-			}
-			Log(log, "SyncAPIOnce")
+			Log(map[string]interface{}{}, "SyncAPIOnce")
 		}
 	}
 	Log(map[string]interface{}{

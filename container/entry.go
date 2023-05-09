@@ -20,11 +20,11 @@ func InitContainer(ctx context.Context, wg *sync.WaitGroup) error {
 	if err != nil {
 		return fmt.Errorf("init logger failed: %s", err.Error())
 	}
-	fmt.Println(appConfig)
 	Log(map[string]interface{}{
 		"app_config": appConfig,
 	}, "AppConfig")
 	InitRouterFactory(appConfig)
+	InitAPI(appConfig)
 	go StartSchedule(ctx, wg, appConfig)
 
 	return nil
