@@ -1,7 +1,6 @@
 {
     "service" : [
         {
-            "env" : "default",
             "host" : "https://tenapi.cn",
             "timeout" : 3000,
             "sign_config" : {

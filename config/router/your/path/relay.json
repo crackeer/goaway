@@ -1,7 +1,4 @@
 {
     "mode" : "relay",
-    "relay_api" : "tenapi/v2_yiyan",
-    "response" : {
-        "simple" : "@v2_yiyan"
-    }
+    "proxy_api" : "tenapi/v2_yiyan"
 }

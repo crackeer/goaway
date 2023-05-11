@@ -63,7 +63,10 @@ func registerAPIContent(content *APIContent, name string) error {
 	list := map[string]*api.ServiceAPI{}
 	for _, service := range content.Service {
 		for _, item := range content.APIList {
-			key := fmt.Sprintf("%s/%s/%s", service.Env, name, item.Name)
+			key := fmt.Sprintf("%s/%s:%s", name, item.Name, service.Env)
+			if len(service.Env) < 1 {
+				key = fmt.Sprintf("%s/%s", name, item.Name)
+			}
 			fmt.Println(key)
 			list[key] = &api.ServiceAPI{
 				Host:           service.Host,
@@ -108,6 +111,7 @@ func InitAPI(cfg *AppConfig) error {
 	if err := registerSign(cfg.SignDir); err != nil {
 		panic(err.Error())
 	}
+	api.SetLogger(GetLogger("api"))
 	/*
 			api.RegisterServiceAPI("abc/test", &api.ServiceAPI{
 				Host:           "https://www.boredapi.com",

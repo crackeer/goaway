@@ -23,7 +23,6 @@ func InitContainer(ctx context.Context, wg *sync.WaitGroup) error {
 	Log(map[string]interface{}{
 		"app_config": appConfig,
 	}, "AppConfig")
-	InitRouterFactory(appConfig)
 	InitAPI(appConfig)
 	go StartSchedule(ctx, wg, appConfig)
 
