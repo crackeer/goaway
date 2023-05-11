@@ -1,10 +1,20 @@
 {
-    "service_map" : {
-        "default" : {
-            "host" : "https://tenapi.cn"
+    "service" : [
+        {
+            "env" : "default",
+            "host" : "https://tenapi.cn",
+            "timeout" : 3000,
+            "sign_config" : {
+
+            }
         }
-    },
+    ],
+    "disable_extract" : true,
     "data_key" : "",
+    "code_key" : "",
+    "success_code" : "",
+    "message_key" : "",
+    "sign_name" : "test",
     "api_list" : [
         {
             "name" : "v2_yiyan",

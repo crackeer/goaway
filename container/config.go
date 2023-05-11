@@ -13,6 +13,7 @@ type AppConfig struct {
 	APIDir       string `env:"API_DIR"`
 
 	LogDir       string `env:"LOG_DIR"`
+	SignDir      string `env:"SIGN_DIR"`
 	SyncInterval int64  `env:"SYNC_INTERVAL"`
 
 	Debug bool `env:"DEBUG"`
