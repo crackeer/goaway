@@ -8,7 +8,7 @@ function test(params, header, config)
     
     local origin = table.concat(joinList, ',')..config['ak']
     params['sign'] = origin
-    return header, params
+    return params, header
 end
     
 function sort(data)
