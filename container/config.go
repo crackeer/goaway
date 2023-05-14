@@ -6,12 +6,13 @@ import (
 )
 
 type AppConfig struct {
-	Env       string `env:"ENV"`
-	Port      int64  `env:"PORT"`
-	RouterDir string `env:"ROUTER_DIR"`
-	APIDir    string `env:"API_DIR"`
-	SignDir   string `env:"SIGN_DIR"`
-	LogDir    string `env:"LOG_DIR"`
+	Env        string `env:"ENV"`
+	Port       int64  `env:"PORT"`
+	SqliteFile string `env:"sqlite_file"`
+	RouterDir  string `env:"ROUTER_DIR"`
+	APIDir     string `env:"API_DIR"`
+	SignDir    string `env:"SIGN_DIR"`
+	LogDir     string `env:"LOG_DIR"`
 
 	SyncInterval int64 `env:"SYNC_INTERVAL"`
 	Debug        bool  `env:"DEBUG"`

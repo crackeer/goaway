@@ -6,6 +6,7 @@ import (
 	syslog "log"
 	"time"
 
+	apiBase "github.com/crackeer/simple_http"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/sirupsen/logrus"
 	writerHook "github.com/sirupsen/logrus/hooks/writer"
@@ -45,6 +46,7 @@ func InitLogger(cfg *AppConfig) error {
 		}
 		loggers[flag] = logger
 	}
+	apiBase.SetLogger(GetLogger("api"))
 	return nil
 }
 

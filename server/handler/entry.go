@@ -16,7 +16,7 @@ import (
 func Handle(ctx *gin.Context) {
 	path := ctx.Request.URL.String()
 	path = strings.Trim(path, "/")
-	config, err := container.GetRouterConfig(path)
+	config, err := container.GetRouter(path)
 	if err != nil {
 		giner.Failure(ctx, -1, err.Error())
 		return
