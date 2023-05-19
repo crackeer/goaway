@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -17,17 +16,17 @@ type SqliteRouter struct {
 	Status   int    `json:"status"`
 }
 
+func (SqliteRouter) TableName() string {
+	return "router"
+}
+
 // GetRouterFromSQLite
 //
 //	@param sqliteFile
 //	@return map
-func GetRouterFromSQLite(sqliteFile string) (map[string]*RouterConfig, error) {
-	sqliteDB, err := gorm.Open(sqlite.Open(sqliteFile), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
+func GetRouterFromDB(db *gorm.DB) (map[string]*RouterConfig, error) {
 	list := []SqliteRouter{}
-	sqliteDB.Model(&SqliteRouter{}).Find(&list)
+	db.Model(&SqliteRouter{}).Find(&list)
 	retData := map[string]*RouterConfig{}
 	for _, item := range list {
 		path := strings.Trim(item.Path, "/")

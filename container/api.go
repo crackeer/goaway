@@ -1,6 +1,9 @@
 package container
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/crackeer/go-gateway/base/api"
 	apiBase "github.com/crackeer/simple_http"
 )
@@ -10,25 +13,10 @@ import (
 //	@param cfg
 //	@return error
 func InitAPI() error {
-	apiList := map[string]*apiBase.ServiceAPI{}
-	if len(config.APIDir) > 0 {
-		list, err := api.GetServiceAPIFromDir(config.APIDir)
-		if err != nil {
-			panic(err.Error())
-		}
-		for key, value := range list {
-			apiList[key] = value
-		}
-	}
 
-	if len(config.SqliteFile) > 0 {
-		list, err := api.GetServiceAPIFromSQLite(config.SqliteFile)
-		if err != nil {
-			panic(err.Error())
-		}
-		for key, value := range list {
-			apiList[key] = value
-		}
+	apiList, errorList := getServiceAPIMap(config.APIDir, config.DBConnection)
+	if len(errorList) > 0 {
+		panic(fmt.Sprintf("get api list error:%s", strings.Join(errorList, ";")))
 	}
 
 	for name, c := range apiList {
@@ -60,4 +48,44 @@ func InitAPI() error {
 			panic(err.Error())
 		}*/
 	return nil
+}
+
+// getServiceAPIMap
+//
+//	@param cfg
+//	@return map[string]*apiBase.ServiceAPI
+//	@return []error
+func getServiceAPIMap(apiDir string, dbConnection string) (map[string]*apiBase.ServiceAPI, []string) {
+	var (
+		apiList   map[string]*apiBase.ServiceAPI = map[string]*apiBase.ServiceAPI{}
+		errorList []string
+	)
+
+	if len(apiDir) > 0 {
+		list, err := api.GetServiceAPIFromDir(apiDir)
+		if err != nil {
+			errorList = append(errorList, err.Error())
+		} else {
+			for key, value := range list {
+				apiList[key] = value
+			}
+		}
+	}
+
+	if len(config.DBConnection) > 0 {
+		db, err := OpenDatabase(config.DBConnection)
+		if err != nil {
+			errorList = append(errorList, fmt.Sprintf("connect %s error:%s", config.DBConnection, err.Error()))
+		} else {
+			list, err := api.GetServiceAPIFromDB(db)
+			if err != nil {
+				errorList = append(errorList, err.Error())
+			} else {
+				for key, value := range list {
+					apiList[key] = value
+				}
+			}
+		}
+	}
+	return apiList, errorList
 }

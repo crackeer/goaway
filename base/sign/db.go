@@ -1,7 +1,6 @@
 package sign
 
 import (
-	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -11,18 +10,18 @@ type SQLiteSign struct {
 	Name string `json:"name"`
 }
 
+func (SQLiteSign) TableName() string {
+	return "sign"
+}
+
 // GetSignCodeFromSQLite GetRouterFromSQLite
 //
 //	@param sqliteFile
 //	@return map[string]*RouterConfig
 //	@return error
-func GetSignCodeFromSQLite(sqliteFile string) (map[string]string, error) {
-	sqliteDB, err := gorm.Open(sqlite.Open(sqliteFile), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
+func GetSignCodeFromDB(db *gorm.DB) (map[string]string, error) {
 	list := []SQLiteSign{}
-	sqliteDB.Model(&SQLiteSign{}).Find(&list)
+	db.Model(&SQLiteSign{}).Find(&list)
 	retData := map[string]string{}
 	for _, item := range list {
 		retData[item.Name] = item.Code

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	apiBase "github.com/crackeer/simple_http"
-	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -16,6 +15,10 @@ type SQLiteServiceAPI struct {
 	Path        string `json:"path"`
 	Service     string `json:"service"`
 	Timeout     int64  `json:"timeout"`
+}
+
+func (SQLiteServiceAPI) TableName() string {
+	return "service_api"
 }
 
 // SQLiteService
@@ -33,25 +36,25 @@ type SQLiteService struct {
 	Timeout        int64  `json:"timeout"`
 }
 
+func (SQLiteService) TableName() string {
+	return "service"
+}
+
 // GetServiceAPIFromSQLite
 //
 //	@param sqliteFile
 //	@return map[string]*apiBase.ServiceAPI
 //	@return error
-func GetServiceAPIFromSQLite(sqliteFile string) (map[string]*apiBase.ServiceAPI, error) {
-	sqliteDB, err := gorm.Open(sqlite.Open(sqliteFile), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
+func GetServiceAPIFromDB(db *gorm.DB) (map[string]*apiBase.ServiceAPI, error) {
 	serviceList := []SQLiteService{}
-	sqliteDB.Model(&SQLiteService{}).Find(&serviceList)
+	db.Model(&SQLiteService{}).Find(&serviceList)
 
 	services := []string{}
 	for _, service := range serviceList {
 		services = append(services, service.Service)
 	}
 	apis := []SQLiteServiceAPI{}
-	sqliteDB.Model(&SQLiteServiceAPI{}).Where(map[string]interface{}{
+	db.Model(&SQLiteServiceAPI{}).Where(map[string]interface{}{
 		"service": services,
 	}).Find(&apis)
 	apiGroup := map[string][]SQLiteServiceAPI{}

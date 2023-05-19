@@ -2,6 +2,8 @@ package container
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/crackeer/go-gateway/base/router"
@@ -24,28 +26,45 @@ func GetRouter(path string) (*router.RouterConfig, error) {
 }
 
 func InitRouter() error {
-	data := map[string]*router.RouterConfig{}
-	if len(config.RouterDir) > 0 {
-		tmp, err := router.GetRouterFromLocal(config.RouterDir)
-		if err != nil {
-			panic(err.Error())
-		}
-		for key, value := range tmp {
-			data[key] = value
-		}
-	}
-
-	if len(config.SqliteFile) > 0 {
-		tmp, err := router.GetRouterFromSQLite(config.SqliteFile)
-		if err != nil {
-			panic(err.Error())
-		}
-		for key, value := range tmp {
-			data[key] = value
-		}
+	data, errorList := getRouter(config.RouterDir, config.DBConnection)
+	if len(errorList) > 0 {
+		panic(fmt.Sprintf("get routers error:%s", strings.Join(errorList, ";")))
 	}
 	for path, c := range data {
 		routerCache.Set(path, c, cache.DefaultExpiration)
 	}
 	return nil
+}
+
+func getRouter(routerDir, dbConnection string) (map[string]*router.RouterConfig, []string) {
+	var (
+		retData   map[string]*router.RouterConfig = map[string]*router.RouterConfig{}
+		errorList []string
+	)
+	if len(routerDir) > 0 {
+		tmp, err := router.GetRouterFromLocal(routerDir)
+		if err != nil {
+			errorList = append(errorList, err.Error())
+		} else {
+			for key, value := range tmp {
+				retData[key] = value
+			}
+		}
+	}
+
+	if len(dbConnection) > 0 {
+		db, err := OpenDatabase(config.DBConnection)
+		if err != nil {
+			errorList = append(errorList, fmt.Sprintf("connect %s error:%s", config.DBConnection, err.Error()))
+		} else {
+			tmp, err := router.GetRouterFromDB(db)
+			if err != nil {
+				panic(err.Error())
+			}
+			for key, value := range tmp {
+				retData[key] = value
+			}
+		}
+	}
+	return retData, errorList
 }
