@@ -78,6 +78,7 @@ func getServiceAPIMap(apiDir string, dbConnection string) (map[string]*apiBase.S
 			errorList = append(errorList, fmt.Sprintf("connect %s error:%s", config.DBConnection, err.Error()))
 		} else {
 			list, err := api.GetServiceAPIFromDB(db)
+			fmt.Println(list)
 			if err != nil {
 				errorList = append(errorList, err.Error())
 			} else {

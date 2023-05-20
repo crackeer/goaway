@@ -32,7 +32,7 @@ func InitContainer(ctx context.Context, wg *sync.WaitGroup) error {
 	InitAPI()
 	InitSign()
 	InitRouter()
-	go StartSchedule(ctx, wg, appConfig)
+	go StartSchedule()
 
 	return nil
 }
@@ -52,4 +52,10 @@ func OpenDatabase(connection string) (*gorm.DB, error) {
 	}
 
 	return nil, errors.New("not support")
+}
+
+func Destroy() {
+	if cronTab != nil {
+		cronTab.Stop()
+	}
 }
