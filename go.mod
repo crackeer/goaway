@@ -4,20 +4,24 @@ go 1.19
 
 require (
 	github.com/caarlos0/env/v6 v6.10.1
-	github.com/crackeer/gopkg v0.0.0-00010101000000-000000000000
+	github.com/crackeer/gopkg v0.0.0-20230129040548-189d2e40a106
+	github.com/crackeer/simple_http v0.0.0-20230520123223-617f6921a047
 	github.com/gin-gonic/gin v1.8.1
+	github.com/glebarez/sqlite v1.8.0
 	github.com/gookit/color v1.4.2
 	github.com/joho/godotenv v1.4.0
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
+	github.com/patrickmn/go-cache v2.1.0+incompatible
+	github.com/robfig/cron/v3 v3.0.0
 	github.com/sirupsen/logrus v1.9.0
+	gorm.io/driver/mysql v1.5.0
+	gorm.io/gorm v1.25.1
 )
 
 require (
-	github.com/crackeer/simple_http v0.0.0-20230508142343-397d0e1096b8 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/glebarez/go-sqlite v1.21.1 // indirect
-	github.com/glebarez/sqlite v1.8.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.10.0 // indirect
@@ -34,11 +38,9 @@ require (
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
-	github.com/robfig/cron/v3 v3.0.0 // indirect
 	github.com/speps/go-hashids v2.0.0+incompatible // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
@@ -52,15 +54,8 @@ require (
 	golang.org/x/text v0.3.6 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gorm.io/driver/mysql v1.5.0 // indirect
-	gorm.io/gorm v1.25.1 // indirect
 	modernc.org/libc v1.22.3 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
 	modernc.org/memory v1.5.0 // indirect
 	modernc.org/sqlite v1.21.1 // indirect
-)
-
-replace (
-	github.com/crackeer/gopkg => ../gopkg
-	github.com/crackeer/simple_http => ../simple_http
 )
