@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="Description">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>Go-Gateway</title>
+    <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
+    <link rel="stylesheet" href="/assets/css/my.css" />
+    <script src="/assets/js/jquery.js"></script>
+    <script src="/assets/js/bootstrap.min.js"></script>
+    <script src="/assets/js/vue.global.js"></script>
+    <script src="/assets/js/axios.min.js"></script>
+    <script src="/assets/js/bootbox.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/page/gateway/header.js"></script>
+
+<body>
+    <div id="header"></div>
+
+    <div class="page-header">
+        <h3>介绍</h3>
+    </div>
+
+    <div class="well">
+        <p>一个简单的业务数据服务网关，通过lua脚本扩展服务节点的验签能力</p>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills nav-justified" id="project" role="tablist" style="margin-bottom: 10px;">
+                <li role="presentation" class="active">
+                    <a href="#router" aria-controls="router" role="router">路由</a>
+                </li>
+                <li role="presentation">
+                    <a href="#service" aria-controls="service" role="service">服务</a>
+                </li>
+                <li role="presentation">
+                    <a href="#sign" aria-controls="sign">签名</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="router">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h4>网关对外输出的路由，注册之后，自动load，包含以下几个部分</h4>
+                            <hr />
+                            <p>
+                                1. path, 也就是uri，全局唯一的
+                            </p>
+                            <p>
+                                2. mode，模式，目前包含<span class="label label-default">static</span>和<span
+                                    class="label label-primary">proxy</span>
+                            </p>
+                            <p>
+                                3. request, 当mode=proxy的时候有效，即请求的后端真实服务标识
+                            </p>
+                            <p>
+                                4. response, 当mode=static的时候，即静态的response数据，当mode=proxy时，即数据返回的一个
+                                空提取结构对象，可以按照你想要的数据格式返回
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div role="tabpanel" class="tab-pane" id="service">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h4>正式后端服务，可注册服务对应的域名，签名方式，Timeout，返回结构的数据抽取方式</h4>
+                            <hr />
+                            <p>
+                                1. host, 域名，例如：http://baidu.com
+                            </p>
+                            <p>
+                                2. 标识, 服务的一个标识，全局唯一
+                            </p>
+                            <p>
+                                3. sign_name, 签名算法标识，对应着第三部分
+                            </p>
+                            <p>
+                                4. sign_config, 签名算法的额外参数，比如ak / sk
+                            </p>
+                            <p>
+                                5, code_key / message_key / data_key / success_code, 数据返回的提取字段
+                            </p>
+                            <p>
+                                6. disable_extract, 当然你也可以禁用提取
+                            </p>
+
+                            <hr />
+                            <p><strong>api，要包含以下几个字段</strong></p>
+                            <p>
+                                path, method, content_type, 唯一标识
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div role="tabpanel" class="tab-pane" id="sign">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h4>签名算法，包含Lua代码片段</h4>
+                            <hr />
+                            <p>
+                                1. 唯一标识, 一个名字，也是lua代码里的必须的一个函数名
+                            </p>
+                            <p>
+                                2. 配置模板，比如ak、sk，source等算法签名需要的额外参数配置
+                            </p>
+                            <p>
+                                3. code，代码内容，即lua代码
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script>
+    $('#project a').click(function (e) {
+        e.preventDefault()
+        $(this).tab('show')
+    })
+    $('.carousel').carousel({
+        interval: 5000,
+        pause: 'hover',
+    })
+</script>
+
+</html>
