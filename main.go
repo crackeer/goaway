@@ -15,9 +15,9 @@ import (
 
 func main() {
 	root := context.Background()
-	gloabalWg := &sync.WaitGroup{}
+	globalWg := &sync.WaitGroup{}
 	cancelCtx, cancel := context.WithCancel(root)
-	if err := container.InitContainer(cancelCtx, gloabalWg); err != nil {
+	if err := container.InitContainer(cancelCtx, globalWg); err != nil {
 		panic(fmt.Sprintf("Failed to initialize container: %v", err.Error()))
 	}
 	appConfig := container.GetAppConfig()
@@ -38,6 +38,6 @@ func main() {
 		color.Warn.Printf("received signal [%s], process will exit\n", signal.String())
 	}
 	cancel()
-	gloabalWg.Wait()
+	globalWg.Wait()
 	container.Destroy()
 }

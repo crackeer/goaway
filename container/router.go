@@ -26,7 +26,7 @@ func GetRouter(path string) (*router.RouterConfig, error) {
 }
 
 func InitRouter() error {
-	data, errorList := getRouter(config.RouterDir, config.DBConnection)
+	data, errorList := getRouter(config.DBConnection)
 	if len(errorList) > 0 {
 		panic(fmt.Sprintf("get routers error:%s", strings.Join(errorList, ";")))
 	}
@@ -36,21 +36,11 @@ func InitRouter() error {
 	return nil
 }
 
-func getRouter(routerDir, dbConnection string) (map[string]*router.RouterConfig, []string) {
+func getRouter(dbConnection string) (map[string]*router.RouterConfig, []string) {
 	var (
 		retData   map[string]*router.RouterConfig = map[string]*router.RouterConfig{}
 		errorList []string
 	)
-	if len(routerDir) > 0 {
-		tmp, err := router.GetRouterFromLocal(routerDir)
-		if err != nil {
-			errorList = append(errorList, err.Error())
-		} else {
-			for key, value := range tmp {
-				retData[key] = value
-			}
-		}
-	}
 
 	if len(dbConnection) > 0 {
 		db, err := OpenDatabase(config.DBConnection)

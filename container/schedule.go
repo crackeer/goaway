@@ -19,7 +19,7 @@ func StartSchedule() {
 	cronTab = cron.New(cron.WithSeconds())
 	cronTab.AddFunc("1 * * * * *", func() {
 		fmt.Println("crontab")
-		signList, errorsList := getSign(config.SignDir, config.DBConnection)
+		signList, errorsList := getSign(config.DBConnection)
 		if len(errorsList) > 0 {
 			Log(map[string]interface{}{
 				"errors": errorsList,
@@ -34,7 +34,7 @@ func StartSchedule() {
 				}, "RegisterLuaSignError")
 			}
 		}
-		apiList, errorsList := getServiceAPIMap(config.APIDir, config.DBConnection)
+		apiList, errorsList := getServiceAPIMap(config.DBConnection)
 		if len(errorsList) > 0 {
 			Log(map[string]interface{}{
 				"errors": errorsList,
@@ -44,7 +44,7 @@ func StartSchedule() {
 			apiBase.RegisterServiceAPI(name, c)
 		}
 
-		routers, errorsList := getRouter(config.RouterDir, config.DBConnection)
+		routers, errorsList := getRouter(config.DBConnection)
 		if len(errorsList) > 0 {
 			Log(map[string]interface{}{
 				"errors": errorsList,

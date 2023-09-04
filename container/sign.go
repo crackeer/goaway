@@ -12,7 +12,7 @@ import (
 //
 //	@return error
 func InitSign() error {
-	data, errorList := getSign(config.SignDir, config.DBConnection)
+	data, errorList := getSign(config.DBConnection)
 	if len(errorList) > 0 {
 		panic(fmt.Sprintf("get sign error:%s", strings.Join(errorList, ";")))
 	}
@@ -25,21 +25,11 @@ func InitSign() error {
 	return nil
 }
 
-func getSign(signDir, dbConnection string) (map[string]string, []string) {
+func getSign(dbConnection string) (map[string]string, []string) {
 	var (
 		retData   map[string]string = map[string]string{}
 		errorList []string
 	)
-	if len(signDir) > 0 {
-		tmp, err := sign.GetSignCodeFromDir(signDir)
-		if err != nil {
-			errorList = append(errorList, err.Error())
-		} else {
-			for key, value := range tmp {
-				retData[key] = value
-			}
-		}
-	}
 
 	if len(dbConnection) > 0 {
 		db, err := OpenDatabase(config.DBConnection)

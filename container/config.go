@@ -9,9 +9,6 @@ type AppConfig struct {
 	Env          string `env:"ENV"`
 	Port         int64  `env:"PORT"`
 	DBConnection string `env:"DB_CONNECTION"`
-	RouterDir    string `env:"ROUTER_DIR"`
-	APIDir       string `env:"API_DIR"`
-	SignDir      string `env:"SIGN_DIR"`
 	LogDir       string `env:"LOG_DIR"`
 
 	SyncInterval int64 `env:"SYNC_INTERVAL"`
