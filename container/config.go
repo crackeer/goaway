@@ -8,6 +8,7 @@ import (
 type AppConfig struct {
 	Env          string `env:"ENV"`
 	Port         int64  `env:"PORT"`
+	AdminPort    int    `env:"ADMIN_PORT"`
 	DBConnection string `env:"DB_CONNECTION"`
 	LogDir       string `env:"LOG_DIR"`
 
