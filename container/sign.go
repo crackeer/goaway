@@ -19,7 +19,7 @@ func InitSign() error {
 	for key, value := range data {
 		err := apiBase.RegisterLuaSign(key, value)
 		if err != nil {
-			panic(fmt.Errorf("register sign error: %v[%s]", err.Error(), key))
+			//panic(fmt.Errorf("register sign error: %v[%s]", err.Error(), key))
 		}
 	}
 	return nil

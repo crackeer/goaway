@@ -21,11 +21,7 @@
     <div id="header"></div>
     <div id="app"></div>
     <template id="template">
-        <div style="padding: 1px 0 10px;">
-            <label class="radio-inline" v-for="(item, i) in classifyList">
-                <input type="radio" name="env" :value="item" v-model="classify" @change="clickClassify">{{item}}
-            </label>
-        </div>
+
         <div style="margin: 15px 0;">
             <button class="btn btn-primary btn-sm" @click="showCreateModel()">新建应用</button>
         </div>
