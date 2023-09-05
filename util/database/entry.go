@@ -60,7 +60,7 @@ func ParseRequest(r *http.Request, path string) (*Request, error) {
 	if len(path) < 1 {
 		return nil, errors.New("nil path")
 	}
-	parts := strings.Split(path, "/")
+	parts := strings.Split(strings.TrimLeft(path, "/"), "/")
 	action := parts[0]
 	bytes, _ := io.ReadAll(r.Body)
 

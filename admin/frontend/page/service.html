@@ -379,7 +379,7 @@
                         })
                     },
                     async getEnvList() {
-                        let result = await axios.post('/distinct/service', {
+                        let result = await axios.post('/api/distinct/service', {
                             "distinct": ['env']
                         })
                         this.envList = result.data.data
@@ -389,7 +389,7 @@
                         if (this.env != '_all_') {
                             query['env'] = this.env
                         }
-                        let result = await axios.post('/select/service', {
+                        let result = await axios.post('/api/select/service', {
                             'query': query,
                             'offset': (this.page - 1) * PAGE_SIZE,
                             'limit': PAGE_SIZE,
@@ -400,7 +400,7 @@
                         for (var i in result.data.data) {
                             namespaces.push(result.data.data[i].service)
                         }
-                        let result1 = await axios.post('/select/service_api', {
+                        let result1 = await axios.post('/api/select/service_api', {
                             'query': {
                                 'service': namespaces,
                             },
@@ -462,7 +462,7 @@
                                 'disable_extract': this.service.disable_extract,
                             }
 
-                            let result = await axios.post('/update/service', {
+                            let result = await axios.post('/api/update/service', {
                                 'query': {
                                     'id': this.service.id
                                 },
@@ -490,7 +490,7 @@
                                 'disable_extract': this.service.disable_extract,
                             }
 
-                            let result = await axios.post('/insert/service', [insertData])
+                            let result = await axios.post('/api/insert/service', [insertData])
                             if (result.data.code < 0) {
                                 alert(result.data.message)
                             } else {
@@ -506,7 +506,7 @@
                         })
                     },
                     async doDeleteService(serviceID) {
-                        let result = await axios.post('/delete/service', {
+                        let result = await axios.post('/api/delete/service', {
                             'query': {
                                 'id': serviceID
                             }
@@ -538,7 +538,7 @@
                             'disable_extract': this.service.disable_extract,
                         }
 
-                        let result = await axios.post('/insert/service', [insertData])
+                        let result = await axios.post('/api/insert/service', [insertData])
                         if (result.data.code < 0) {
                             alert(result.data.message)
                         } else {
@@ -577,7 +577,7 @@
                                 'content_type': this.api.content_type,
                             }
 
-                            let result = await axios.post('/update/service_api', {
+                            let result = await axios.post('/api/update/service_api', {
                                 'query': {
                                     'id': this.api.id
                                 },
@@ -599,7 +599,7 @@
                                 'content_type': this.api.content_type,
                             }
 
-                            let result = await axios.post('/insert/service_api', [insertData])
+                            let result = await axios.post('/api/insert/service_api', [insertData])
                             if (result.data.code < 0) {
                                 alert(result.data.message)
                             } else {
@@ -615,7 +615,7 @@
                         })
                     },
                     async doDeleteServiceApi(id) {
-                        let result = await axios.post('/delete/service_api', {
+                        let result = await axios.post('/api/delete/service_api', {
                             'query': {
                                 'id': id
                             }
@@ -627,7 +627,7 @@
                         }
                     },
                     async getSignList() {
-                        let result = await axios.post('/select/sign', {
+                        let result = await axios.post('/api/select/sign', {
                             'query': {},
                             'offset': (this.page - 1) * 100,
                             'limit': 100,

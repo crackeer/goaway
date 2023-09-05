@@ -190,7 +190,7 @@
                 },
                 methods: {
                     async getServiceList() {
-                        let result = await axios.post('/select/service', {
+                        let result = await axios.post('/api/select/service', {
                             'query': {
                                 'env': 'default',
                             },
@@ -201,7 +201,7 @@
                         this.serviceList = result.data.data
                     },
                     async getServiceAPIList() {
-                        let result = await axios.post('/select/service_api', {
+                        let result = await axios.post('/api/select/service_api', {
                             'query': {
                                 'service': this.router.tmp_service,
                             },
@@ -230,7 +230,7 @@
                         })
                     },
                     async getClassifyList() {
-                        let result = await axios.post('/distinct/router', {
+                        let result = await axios.post('/api/distinct/router', {
                             "distinct": ['classify']
                         })
                         this.classifyList = result.data.data
@@ -240,7 +240,7 @@
                         if (this.classify != '_all_') {
                             query['classify'] = this.classify
                         }
-                        let result = await axios.post('/select/router', {
+                        let result = await axios.post('/api/select/router', {
                             'query': query,
                             'offset': (this.page - 1) * PAGE_SIZE,
                             'limit': PAGE_SIZE,
@@ -307,7 +307,7 @@
                             updateData['request'] = this.router.tmp_service + '/' + this.router.tmp_api
                         }
                         if (this.edit) {
-                            let result = await axios.post('/update/router', {
+                            let result = await axios.post('/api/update/router', {
                                 'query': {
                                     'id': this.router.id
                                 },
@@ -319,7 +319,7 @@
                                 simpleReload()
                             }
                         } else {
-                            let result = await axios.post('/insert/router', [updateData])
+                            let result = await axios.post('/api/insert/router', [updateData])
                             if (result.data.code < 0) {
                                 alert(result.data.message)
                             } else {
@@ -335,7 +335,7 @@
                         })
                     },
                     async doDeleteRouter(id) {
-                        let result = await axios.post('/delete/router', {
+                        let result = await axios.post('/api/delete/router', {
                             'query': {
                                 'id': id
                             }

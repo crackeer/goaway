@@ -132,7 +132,7 @@
                 },
                 methods: {
                     async getSignList() {
-                        let result = await axios.post('/select/sign', {
+                        let result = await axios.post('/api/select/sign', {
                             'query': {},
                             'offset': 0,
                             'limit': 100,
@@ -181,7 +181,7 @@
                                 'config_template': JSON.stringify(window.jsonEditor.get()),
                             }
 
-                            let result = await axios.post('/update/sign', {
+                            let result = await axios.post('/api/update/sign', {
                                 'query': {
                                     'id': this.sign.id
                                 },
@@ -200,7 +200,7 @@
                                 'config_template': JSON.stringify(window.jsonEditor.get()),
                             }
 
-                            let result = await axios.post('/insert/sign', [insertData])
+                            let result = await axios.post('/api/insert/sign', [insertData])
                             if (result.data.code < 0) {
                                 alert(result.data.message)
                             } else {
@@ -216,7 +216,7 @@
                         })
                     },
                     async doDeleteSign(id) {
-                        let result = await axios.post('/delete/sign', {
+                        let result = await axios.post('/api/delete/sign', {
                             'query': {
                                 'id': id
                             }

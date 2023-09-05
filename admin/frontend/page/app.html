@@ -153,7 +153,6 @@
     <script>
 
         $(document).ready(function () {
-            axios.defaults.headers.common['proxy'] = "storage";
             const PAGE_SIZE = 20
             var vm = Vue.createApp({
                 data() {
@@ -208,7 +207,7 @@
                         })
                     },
                     async getClassifyList() {
-                        let result = await axios.post('/distinct/router', {
+                        let result = await axios.post('/api/distinct/router', {
                             "distinct": ['classify']
                         })
                         this.classifyList = result.data.data
@@ -218,7 +217,7 @@
                         if (this.classify != '_all_') {
                             query['classify'] = this.classify
                         }
-                        let result = await axios.post('/select/router', {
+                        let result = await axios.post('/api/select/router', {
                             'query': query,
                             'offset': (this.page - 1) * PAGE_SIZE,
                             'limit': PAGE_SIZE,
@@ -255,7 +254,7 @@
                                 'description': this.router.description,
                             }
 
-                            let result = await axios.post('/update/router', {
+                            let result = await axios.post('/api/update/router', {
                                 'query': {
                                     'id': this.router.id
                                 },
@@ -293,7 +292,7 @@
                         })
                     },
                     async doDeleteRouter(id) {
-                        let result = await axios.post('/delete/router', {
+                        let result = await axios.post('/api/delete/router', {
                             'query': {
                                 'id': id
                             }
