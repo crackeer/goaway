@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="description" content="Description">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Go-Gateway</title>
+    <title>路由</title>
     <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
     <link rel="stylesheet" href="/assets/css/my.css" />
     <script src="/assets/js/jquery.js"></script>
@@ -15,121 +15,351 @@
     <script src="/assets/js/axios.min.js"></script>
     <script src="/assets/js/bootbox.min.js"></script>
     <script src="/assets/js/util.js"></script>
-    <script src="/page/gateway/header.js"></script>
+    <script src="/page/header.js"></script>
+    <script src="/assets/js/jsoneditor9.8.js"></script>
+    <link href="/assets/css/jsoneditor9.8.css" rel="stylesheet" />
+
 
 <body>
     <div id="header"></div>
+    <div id="app"></div>
+    <template id="template">
+        <div style="padding: 1px 0 10px;">
+            <label class="radio-inline">
+                <input type="radio" name="env" value="_all_" v-model="classify" @change="clickClassify">全部
+            </label>
+            <label class="radio-inline" v-for="(item, i) in classifyList">
+                <input type="radio" name="env" :value="item" v-model="classify" @change="clickClassify">{{item}}
+            </label>
+        </div>
+        <div style="margin: 15px 0;">
+            <button class="btn btn-primary btn-sm" @click="showCreateModel()">新建路由</button>
+        </div>
 
-    <div class="page-header">
-        <h3>介绍</h3>
-    </div>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Path</th>
+                    <th>模式</th>
+                    <th>请求</th>
+                    <th>返回</th>
+                    <th>描述</th>
+                    <th>操作</th>
+                </tr>
+            <tbody>
+                <tr v-for="(item, i) in this.routerList">
+                    <td>{{item.id}}</td>
+                    <td>{{item.path}}</td>
+                    <td>{{item.mode}}</td>
+                    <td>{{item.request}}</td>
+                    <td><button class="btn btn-sm btn-link" @click="showResponse(item)">查看</button></td>
+                    <td>{{item.description}}</td>
+                    <td>
+                        <button class="btn btn-sm btn-link" @click="showEditModal(item)">编辑</button>
+                        <button class="btn btn-sm btn-link" @click="showDeleteModal(item)">删除</button>
+                        <button class="btn btn-sm btn-link" @click="showCopyModal(item)">复制</button>
+                    </td>
+                </tr>
+        </table>
 
-    <div class="well">
-        <p>一个简单的业务数据服务网关，通过lua脚本扩展服务节点的验签能力</p>
-    </div>
-
-
-    <div class="row">
-        <div class="col-md-12">
-            <ul class="nav nav-pills nav-justified" id="project" role="tablist" style="margin-bottom: 10px;">
-                <li role="presentation" class="active">
-                    <a href="#router" aria-controls="router" role="router">路由</a>
-                </li>
-                <li role="presentation">
-                    <a href="#service" aria-controls="service" role="service">服务</a>
-                </li>
-                <li role="presentation">
-                    <a href="#sign" aria-controls="sign">签名</a>
-                </li>
-            </ul>
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane active" id="router">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <h4>网关对外输出的路由，注册之后，自动load，包含以下几个部分</h4>
-                            <hr />
-                            <p>
-                                1. path, 也就是uri，全局唯一的
-                            </p>
-                            <p>
-                                2. mode，模式，目前包含<span class="label label-default">static</span>和<span
-                                    class="label label-primary">proxy</span>
-                            </p>
-                            <p>
-                                3. request, 当mode=proxy的时候有效，即请求的后端真实服务标识
-                            </p>
-                            <p>
-                                4. response, 当mode=static的时候，即静态的response数据，当mode=proxy时，即数据返回的一个
-                                空提取结构对象，可以按照你想要的数据格式返回
-                            </p>
+        <div class="modal fade" tabindex="-1" role="dialog" id="myModal">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">{{ this.edit ? '修改' : '创建'}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label for="path" class="control-label col-sm-2">路径</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" v-model="router.path">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="description" class="control-label col-sm-2">分类</label>
+                                <div class="col-sm-5">
+                                    <input type="text" class="form-control" v-model="router.classify" />
+                                </div>
+                                <div class="col-sm-5">
+                                    <select class="form-control" v-model="router.classify">
+                                        <template v-for="item in classifyList">
+                                            <option :value="item">{{item}}</option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="request_type" class="control-label col-sm-2">方式</label>
+                                <div class="col-sm-10">
+                                    <label class="radio-inline">
+                                        <input type="radio" name="mode" value="static" v-model="router.mode">
+                                        静态
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" name="mode" value="relay" v-model="router.mode">
+                                        代理
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group" v-if="router.mode == 'relay'">
+                                <label for="request_config" class="control-label col-sm-2">请求配置</label>
+                                <div class="col-sm-5">
+                                    <select class="form-control" v-model="router.tmp_service"
+                                        @change="getServiceAPIList">
+                                        <template v-for="item in serviceList">
+                                            <option :value="item.service">{{item.name}}</option>
+                                        </template>
+                                    </select>
+                                    <span class="help-block">服务</span>
+                                </div>
+                                <div class="col-sm-5">
+                                    <select class="form-control" v-model="router.tmp_api">
+                                        <template v-for="item in serviceApiList">
+                                            <option :value="item.api">[{{item.method}}]{{item.path}}</option>
+                                        </template>
+                                    </select>
+                                    <span class="help-block">接口</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="response_type" class="control-label col-sm-2">返回</label>
+                                <div class="col-sm-10">
+                                    <div id="jsoneditor" style="width: 100%; height: 300px"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="description" class="control-label col-sm-2">描述</label>
+                                <div class="col-sm-10">
+                                    <textarea class="form-control" v-model="router.description"></textarea>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div role="tabpanel" class="tab-pane" id="service">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <h4>正式后端服务，可注册服务对应的域名，签名方式，Timeout，返回结构的数据抽取方式</h4>
-                            <hr />
-                            <p>
-                                1. host, 域名，例如：http://baidu.com
-                            </p>
-                            <p>
-                                2. 标识, 服务的一个标识，全局唯一
-                            </p>
-                            <p>
-                                3. sign_name, 签名算法标识，对应着第三部分
-                            </p>
-                            <p>
-                                4. sign_config, 签名算法的额外参数，比如ak / sk
-                            </p>
-                            <p>
-                                5, code_key / message_key / data_key / success_code, 数据返回的提取字段
-                            </p>
-                            <p>
-                                6. disable_extract, 当然你也可以禁用提取
-                            </p>
-
-                            <hr />
-                            <p><strong>api，要包含以下几个字段</strong></p>
-                            <p>
-                                path, method, content_type, 唯一标识
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div role="tabpanel" class="tab-pane" id="sign">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <h4>签名算法，包含Lua代码片段</h4>
-                            <hr />
-                            <p>
-                                1. 唯一标识, 一个名字，也是lua代码里的必须的一个函数名
-                            </p>
-                            <p>
-                                2. 配置模板，比如ak、sk，source等算法签名需要的额外参数配置
-                            </p>
-                            <p>
-                                3. code，代码内容，即lua代码
-                            </p>
-                        </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" @click="doUpdateRouter()">保存</button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
+
+        <div style="text-align: center;">
+            <div style="margin: 10px auto;">
+                <button type="button" class="btn btn-link" v-if="page > 1" @click="prev()">上一页</button>
+                <span style="font-size: 16px;">第{{page}}页 </span>
+                <button type="button" class="btn btn-link" @click="next()"
+                    v-if="routerList.length >= pageSize">下一页</button>
+            </div>
+        </div>
+    </template>
+    <script>
+
+        $(document).ready(function () {
+            axios.defaults.headers.common['proxy'] = "storage";
+            window.jsonEditor = null;
+            const PAGE_SIZE = 20
+            var vm = Vue.createApp({
+                data() {
+                    let list = []
+                    return {
+                        serviceList: [],
+                        serviceApiList: [],
+                        classifyList: [],
+                        routerList: [],
+                        classify: "",
+                        page: 1,
+
+                        router: {},
+                        edit: false,
+                        copyEnv: '',
+                        pageSize: PAGE_SIZE,
+                    }
+                },
+                template: '#template',
+                async mounted() {
+                    this.page = parseInt(getQuery('page', '1'))
+                    this.classify = getQuery('classify', '_all_')
+                    await this.getClassifyList()
+                    await this.getRouterList()
+                    this.getServiceList()
+                },
+                methods: {
+                    async getServiceList() {
+                        let result = await axios.post('/select/service', {
+                            'query': {
+                                'env': 'default',
+                            },
+                            'offset': 0,
+                            'limit': 1000,
+                            'order_by': 'id desc',
+                        })
+                        this.serviceList = result.data.data
+                    },
+                    async getServiceAPIList() {
+                        let result = await axios.post('/select/service_api', {
+                            'query': {
+                                'service': this.router.tmp_service,
+                            },
+                            'offset': 0,
+                            'limit': 1000,
+                            'order_by': 'id desc',
+                        })
+                        this.serviceApiList = result.data.data
+                    },
+                    async clickClassify() {
+                        reloadWith({
+                            classify: this.classify,
+                            page: 1,
+                        })
+                    },
+                    async next() {
+                        reloadWith({
+                            classify: this.classify,
+                            page: this.page + 1,
+                        })
+                    },
+                    async prev() {
+                        reloadWith({
+                            classify: this.classify,
+                            page: this.page - 1,
+                        })
+                    },
+                    async getClassifyList() {
+                        let result = await axios.post('/distinct/router', {
+                            "distinct": ['classify']
+                        })
+                        this.classifyList = result.data.data
+                    },
+                    async getRouterList() {
+                        let query = {}
+                        if (this.classify != '_all_') {
+                            query['classify'] = this.classify
+                        }
+                        let result = await axios.post('/select/router', {
+                            'query': query,
+                            'offset': (this.page - 1) * PAGE_SIZE,
+                            'limit': PAGE_SIZE,
+                            'order_by': 'id desc',
+                        })
+
+                        this.routerList = result.data.data
+                    },
+                    async showEditModal(item) {
+                        let editData = cloneObject(item)
+                        if(item.mode == 'relay') {
+                            let parts = item.request.split('/')
+                            editData['tmp_service'] = parts[0]
+                            editData['tmp_api'] = parts[1]
+                        }
+                        this.getServiceAPIList()
+                        this.router = editData
+
+                        this.edit = true
+                        $('#myModal').modal()
+                        if (window.jsonEditor == null) {
+                            window.jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), {
+                                "mode": "code",
+                                "search": true,
+                                "indentation": 4
+                            })
+                        }
+                        window.jsonEditor.set(JSON.parse(item.response))
+                    },
+                    async showCreateModel() {
+                        this.router = {
+                            'path': '',
+                            'description': '',
+                            'mode': 'proxy',
+                            'request': '',
+                            'response': '',
+                        }
+                        this.edit = false
+                        $('#myModal').modal()
+                        if (window.jsonEditor == null) {
+                            window.jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), {
+                                "mode": "code",
+                                "search": true,
+                                "indentation": 4
+                            })
+                        }
+                        window.jsonEditor.set({})
+                    },
+                    async doUpdateRouter() {
+                        let updateData = {
+                            'path': this.router.path,
+                            'status': 0,
+                            'classify': this.router.classify,
+                            'mode': this.router.mode,
+                            'request': '',
+                            'response': JSON.stringify(window.jsonEditor.get()),
+                            'description': this.router.description,
+                        }
+                        if (this.router.mode == 'relay') {
+                            if (this.router.tmp_service.length < 1 || this.router.tmp_api.length < 1) {
+                                bootbox.alert('请选择转发的API')
+                                return
+                            }
+                            updateData['request'] = this.router.tmp_service + '/' + this.router.tmp_api
+                        }
+                        if (this.edit) {
+                            let result = await axios.post('/update/router', {
+                                'query': {
+                                    'id': this.router.id
+                                },
+                                'update': updateData,
+                            })
+                            if (result.data.code < 0) {
+                                alert(result.data.message)
+                            } else {
+                                simpleReload()
+                            }
+                        } else {
+                            let result = await axios.post('/insert/router', [updateData])
+                            if (result.data.code < 0) {
+                                alert(result.data.message)
+                            } else {
+                                simpleReload()
+                            }
+                        }
+                    },
+                    async showDeleteModal(item) {
+                        bootbox.confirm("确认删除`" + item.path + "`？", (result) => {
+                            if (result) {
+                                this.doDeleteRouter(item.id)
+                            }
+                        })
+                    },
+                    async doDeleteRouter(id) {
+                        let result = await axios.post('/delete/router', {
+                            'query': {
+                                'id': id
+                            }
+                        })
+                        if (result.data.code < 0) {
+                            alert(result.data.message)
+                        } else {
+                            simpleReload()
+                        }
+                    },
+                    async showCopyModal(item) {
+                        this.service = item
+                        $('#copyModal').modal()
+                    },
+                    async showResponse(item) {
+                       
+                        bootbox.alert(item.response)
+                    }
+                },
+
+            })
+            vm.mount('#app')
+        })
+    </script>
 </body>
-<script>
-    $('#project a').click(function (e) {
-        e.preventDefault()
-        $(this).tab('show')
-    })
-    $('.carousel').carousel({
-        interval: 5000,
-        pause: 'hover',
-    })
-</script>
 
 </html>
