@@ -1,16 +1,16 @@
-package sign
+package model
 
 import (
 	"gorm.io/gorm"
 )
 
-// SQLiteSign
-type SQLiteSign struct {
+// Sign SQLiteSign
+type Sign struct {
 	Code string `json:"code"`
 	Name string `json:"name"`
 }
 
-func (SQLiteSign) TableName() string {
+func (Sign) TableName() string {
 	return "sign"
 }
 
@@ -20,8 +20,8 @@ func (SQLiteSign) TableName() string {
 //	@return map[string]*RouterConfig
 //	@return error
 func GetSignCodeFromDB(db *gorm.DB) (map[string]string, error) {
-	list := []SQLiteSign{}
-	db.Model(&SQLiteSign{}).Find(&list)
+	list := []Sign{}
+	db.Model(&Sign{}).Find(&list)
 	retData := map[string]string{}
 	for _, item := range list {
 		retData[item.Name] = item.Code

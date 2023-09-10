@@ -1,4 +1,4 @@
-package api
+package model
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type SQLiteServiceAPI struct {
+type ServiceAPI struct {
 	API         string `json:"api"`
 	ContentType string `json:"content_type"`
 	Method      string `json:"method"`
@@ -17,12 +17,12 @@ type SQLiteServiceAPI struct {
 	Timeout     int64  `json:"timeout"`
 }
 
-func (SQLiteServiceAPI) TableName() string {
+func (ServiceAPI) TableName() string {
 	return "service_api"
 }
 
-// SQLiteService
-type SQLiteService struct {
+// Service
+type Service struct {
 	CodeKey        string `json:"code_key"`
 	DataKey        string `json:"data_key"`
 	Env            string `json:"env"`
@@ -36,31 +36,31 @@ type SQLiteService struct {
 	Timeout        int64  `json:"timeout"`
 }
 
-func (SQLiteService) TableName() string {
+func (Service) TableName() string {
 	return "service"
 }
 
-// GetServiceAPIFromSQLite
+// GetServiceAPIFrom
 //
-//	@param sqliteFile
+//	@param File
 //	@return map[string]*apiBase.ServiceAPI
 //	@return error
 func GetServiceAPIFromDB(db *gorm.DB) (map[string]*apiBase.ServiceAPI, error) {
-	serviceList := []SQLiteService{}
-	db.Model(&SQLiteService{}).Find(&serviceList)
+	serviceList := []Service{}
+	db.Model(&Service{}).Find(&serviceList)
 
 	services := []string{}
 	for _, service := range serviceList {
 		services = append(services, service.Service)
 	}
-	apis := []SQLiteServiceAPI{}
-	db.Model(&SQLiteServiceAPI{}).Where(map[string]interface{}{
+	apis := []ServiceAPI{}
+	db.Model(&ServiceAPI{}).Where(map[string]interface{}{
 		"service": services,
 	}).Find(&apis)
-	apiGroup := map[string][]SQLiteServiceAPI{}
+	apiGroup := map[string][]ServiceAPI{}
 	for _, item := range apis {
 		if _, ok := apiGroup[item.Service]; !ok {
-			apiGroup[item.Service] = []SQLiteServiceAPI{}
+			apiGroup[item.Service] = []ServiceAPI{}
 		}
 		apiGroup[item.Service] = append(apiGroup[item.Service], item)
 	}

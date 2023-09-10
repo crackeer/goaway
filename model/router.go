@@ -1,4 +1,4 @@
-package router
+package model
 
 import (
 	"encoding/json"
@@ -7,8 +7,16 @@ import (
 	"gorm.io/gorm"
 )
 
+// RouterConfig
+type RouterConfig struct {
+	Mode     string      `json:"mode"`
+	ProxyAPI string      `json:"proxy_api"`
+	Response interface{} `json:"response"`
+	Status   int         `json:"status"`
+}
+
 // SqliteRouter
-type SqliteRouter struct {
+type Router struct {
 	Mode     string `json:"mode"`
 	Path     string `json:"path"`
 	Request  string `json:"request"`
@@ -16,7 +24,7 @@ type SqliteRouter struct {
 	Status   int    `json:"status"`
 }
 
-func (SqliteRouter) TableName() string {
+func (Router) TableName() string {
 	return "router"
 }
 
@@ -25,14 +33,15 @@ func (SqliteRouter) TableName() string {
 //	@param sqliteFile
 //	@return map
 func GetRouterFromDB(db *gorm.DB) (map[string]*RouterConfig, error) {
-	list := []SqliteRouter{}
-	db.Model(&SqliteRouter{}).Find(&list)
+	list := []Router{}
+	db.Model(&Router{}).Find(&list)
 	retData := map[string]*RouterConfig{}
 	for _, item := range list {
 		path := strings.Trim(item.Path, "/")
 		tmp := &RouterConfig{
 			Mode:     item.Mode,
 			ProxyAPI: item.Request,
+			Status:   item.Status,
 		}
 		var response interface{}
 		if err := json.Unmarshal([]byte(item.Response), &response); err == nil {

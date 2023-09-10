@@ -11,6 +11,7 @@ import (
 	"github.com/crackeer/go-gateway/admin"
 	"github.com/crackeer/go-gateway/container"
 	"github.com/crackeer/go-gateway/server"
+	"github.com/crackeer/go-gateway/util/database"
 	"github.com/gookit/color"
 )
 
@@ -31,7 +32,7 @@ func main() {
 	}()
 
 	go func() {
-		db, _ := container.OpenDatabase(appConfig.DBConnection)
+		db, _ := database.Open(appConfig.DBConnection)
 		adminErrChan <- admin.Run(root, &admin.AdminConfig{
 			Port:      int64(appConfig.AdminPort),
 			DB:        db,

@@ -60,6 +60,5 @@ func handleAPI(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		ginHelper.Success(ctx, result)
-
 	}
 }

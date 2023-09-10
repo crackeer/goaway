@@ -14,6 +14,7 @@ import (
 //	@param ctx
 func Run(ctx context.Context, port int64) error {
 	engine := newGinEngine()
+	engine.POST("auth/token", handler.Token)
 	addRouterHandler(engine)
 	return engine.Run(fmt.Sprintf(":%d", port))
 }
