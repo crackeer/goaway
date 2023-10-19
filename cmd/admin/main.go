@@ -1,34 +1,23 @@
-package admin
+package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strings"
 
+	"github.com/caarlos0/env/v6"
 	"github.com/crackeer/go-gateway/util/database"
 	ginHelper "github.com/crackeer/gopkg/gin"
 	"github.com/gin-gonic/gin"
+	_ "github.com/joho/godotenv/autoload"
 	"gorm.io/gorm"
 )
 
-// AdminConfig
-type AdminConfig struct {
-	Port      int64
-	DB        *gorm.DB
-	StaticDir string
-}
-
-// Run
-//
-//	@param ctx
-func Run(ctx context.Context, cfg *AdminConfig) error {
-	router := gin.New()
-	router.RedirectFixedPath = false
-	router.RedirectTrailingSlash = false
-	router.Any("/api/*path", ginHelper.DoResponseJSON(), handleAPI(cfg.DB))
-	router.NoRoute(createStaticHandler(http.Dir(cfg.StaticDir)))
-	return router.Run(fmt.Sprintf(":%d", cfg.Port))
+type AppConfig struct {
+	Port      int64  `env:"PORT"`
+	Database  string `env:"DATABASE"`
+	LogDir    string `env:"LOG_DIR"`
+	StaticDir string `env:"STATIC_DIR"`
 }
 
 func createStaticHandler(fs http.FileSystem) gin.HandlerFunc {
@@ -61,4 +50,21 @@ func handleAPI(db *gorm.DB) gin.HandlerFunc {
 		}
 		ginHelper.Success(ctx, result)
 	}
+}
+
+func main() {
+	cfg := &AppConfig{}
+	if err := env.Parse(cfg); err != nil {
+		panic(err)
+	}
+	router := gin.New()
+	router.RedirectFixedPath = false
+	router.RedirectTrailingSlash = false
+	db, err := database.Open(cfg.Database)
+	if err != nil {
+		panic(err)
+	}
+	router.Any("/api/*path", ginHelper.DoResponseJSON(), handleAPI(db))
+	router.NoRoute(createStaticHandler(http.Dir(cfg.StaticDir)))
+	router.Run(fmt.Sprintf(":%d", cfg.Port))
 }

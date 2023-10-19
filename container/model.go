@@ -14,13 +14,11 @@ import (
 
 var (
 	routerCache *cache.Cache
-	appCache    *cache.Cache
 	modelDB     *gorm.DB
 )
 
 func init() {
 	routerCache = cache.New(20*time.Minute, 30*time.Minute)
-	appCache = cache.New(20*time.Minute, 30*time.Minute)
 }
 
 // InitModel
@@ -43,19 +41,6 @@ func saveModel() {
 	for name, value := range apis {
 		apiBase.RegisterServiceAPI(name, value)
 	}
-
-	signs, _ := model.GetSignCodeFromDB(modelDB)
-	for key, value := range signs {
-		err := apiBase.RegisterLuaSign(key, value)
-		if err != nil {
-			//panic(fmt.Errorf("register sign error: %v[%s]", err.Error(), key))
-		}
-	}
-	apps, _ := model.GetAppList(modelDB)
-	for path, value := range apps {
-		routerCache.Set(path, value, cache.DefaultExpiration)
-	}
-
 }
 
 // GetRouter
@@ -68,16 +53,4 @@ func GetRouter(path string) (*model.RouterConfig, error) {
 		return value.(*model.RouterConfig), nil
 	}
 	return nil, errors.New("not found: " + path)
-}
-
-// GetApp
-//
-//	@param appID
-//	@return *model.AppConfig
-//	@return error
-func GetApp(appID string) (*model.AppConfig, error) {
-	if value, exists := routerCache.Get(appID); exists {
-		return value.(*model.AppConfig), nil
-	}
-	return nil, errors.New("not found: " + appID)
 }

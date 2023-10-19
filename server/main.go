@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"context"
@@ -9,11 +9,13 @@ import (
 	"syscall"
 
 	"github.com/crackeer/go-gateway/container"
-	"github.com/crackeer/go-gateway/server"
+	"github.com/crackeer/go-gateway/server/handler"
+	giner "github.com/crackeer/gopkg/gin"
+	"github.com/gin-gonic/gin"
 	"github.com/gookit/color"
 )
 
-func main() {
+func Main() {
 	root := context.Background()
 	globalWg := &sync.WaitGroup{}
 	cancelCtx, cancel := context.WithCancel(root)
@@ -24,7 +26,7 @@ func main() {
 
 	errChan := make(chan error)
 	go func() {
-		errChan <- server.Run(root, appConfig.Port)
+		errChan <- Run(root, appConfig.Port)
 	}()
 
 	signalChan := make(chan os.Signal, 1)
@@ -39,4 +41,18 @@ func main() {
 	cancel()
 	globalWg.Wait()
 	container.Destroy()
+}
+
+// Run
+//
+//	@param ctx
+func Run(ctx context.Context, port int64) error {
+	router := gin.New()
+	router.RedirectFixedPath = false
+	router.RedirectTrailingSlash = false
+
+	router.Use(giner.DoResponseJSON())
+	router.Any("proxy/*api", handler.Proxy)
+	router.NoRoute(handler.Handle)
+	return router.Run(fmt.Sprintf(":%d", port))
 }
