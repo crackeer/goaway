@@ -1,4 +1,4 @@
-module github.com/crackeer/go-gateway
+module github.com/crackeer/goaway
 
 go 1.19
 

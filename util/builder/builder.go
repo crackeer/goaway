@@ -99,9 +99,7 @@ func (b Builder) Build(ctx context.Context, outputFile string) error {
 	}
 
 	// compile
-	cmd := buildEnv.newGoBuildCommand(ctx, "build",
-		"--tags=slm_locker",
-	)
+	cmd := buildEnv.newGoBuildCommand(ctx, "build")
 	if b.Debug {
 		// support dlv
 		cmd.Args = append(cmd.Args, "-gcflags", "all=-N -l")

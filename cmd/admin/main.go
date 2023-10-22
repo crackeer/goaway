@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/caarlos0/env/v6"
-	"github.com/crackeer/go-gateway/util/database"
+	"github.com/crackeer/goaway/util/database"
 	ginHelper "github.com/crackeer/gopkg/gin"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"

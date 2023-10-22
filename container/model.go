@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/crackeer/go-gateway/model"
-	"github.com/crackeer/go-gateway/util/database"
+	"github.com/crackeer/goaway/model"
+	"github.com/crackeer/goaway/util/database"
 	apiBase "github.com/crackeer/simple_http"
 	"github.com/patrickmn/go-cache"
 	"gorm.io/gorm"

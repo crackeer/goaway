@@ -8,8 +8,8 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/crackeer/go-gateway/container"
-	"github.com/crackeer/go-gateway/server/handler"
+	"github.com/crackeer/goaway/container"
+	"github.com/crackeer/goaway/server/handler"
 	giner "github.com/crackeer/gopkg/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/color"

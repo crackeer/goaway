@@ -3,7 +3,7 @@ package handler
 import (
 	"strings"
 
-	"github.com/crackeer/go-gateway/container"
+	"github.com/crackeer/goaway/container"
 	giner "github.com/crackeer/gopkg/gin"
 	api "github.com/crackeer/simple_http"
 	"github.com/gin-gonic/gin"
