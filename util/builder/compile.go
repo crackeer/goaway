@@ -1,4 +1,4 @@
-package builder
+package compile
 
 import (
 	"context"
@@ -19,7 +19,6 @@ import (
 // Builder can produce a custom Caddy build with the
 // configuration it represents.
 type Builder struct {
-	Compile
 	CaddyVersion string        `json:"caddy_version,omitempty"`
 	Replacements []Replace     `json:"replacements,omitempty"`
 	TimeoutGet   time.Duration `json:"timeout_get,omitempty"`

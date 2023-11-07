@@ -85,16 +85,6 @@ func (b Builder) newEnvironment(ctx context.Context) (*environment, error) {
 	// pin versions by populating go.mod, first for Caddy itself and then plugins
 	log.Println("[INFO] Pinning versions")
 
-	err = env.runCommand(ctx, env.newCommand(ctx, "go", "env", `-w`, `GOPRIVATE=*.lianjia.com`))
-	if err != nil {
-		return nil, err
-	}
-
-	err = env.runCommand(ctx, env.newCommand(ctx, "git", "config", "--global", `--replace-all`, `url."git@git.lianjia.com:".insteadOf`, `"https://git.lianjia.com"`))
-	if err != nil {
-		return nil, err
-	}
-
 	err = env.execGoGet(ctx, caddyModulePath, env.caddyVersion, "", "")
 	if err != nil {
 		return nil, err
