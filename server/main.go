@@ -29,6 +29,10 @@ func Main() {
 		errChan <- Run(root, appConfig.Port)
 	}()
 
+	go func() {
+		errChan <- RunConsole()
+	}()
+
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGINT)
 

@@ -16,7 +16,7 @@ func Proxy(ctx *gin.Context) {
 	apiName = strings.TrimLeft(apiName, "/")
 	input := giner.AllParams(ctx)
 	header := giner.AllHeader(ctx)
-	response, err := api.RequestServiceAPIByName(apiName, input, header)
+	response, err := api.RequestByName(apiName, input, header)
 	if err != nil {
 		giner.Success(ctx, err.Error())
 	} else {

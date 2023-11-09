@@ -27,7 +27,7 @@ func Handle(ctx *gin.Context) {
 
 	input := giner.AllParams(ctx)
 	header := giner.AllHeader(ctx)
-	response, err := api.RequestServiceAPIByName(config.ProxyAPI+":default", input, header)
+	response, err := api.RequestByName(config.ProxyAPI+":default", input, header)
 	if err != nil {
 		giner.Failure(ctx, -1, err.Error())
 		return

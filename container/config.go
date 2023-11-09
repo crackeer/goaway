@@ -7,12 +7,13 @@ import (
 
 type AppConfig struct {
 	Env          string `env:"ENV"`
+	ConsolePort  int    `env:"CONSOLE_PORT"`
+	StaticDir    string `env:"STATIC_DIR"`
 	Port         int64  `env:"PORT"`
-	DBConnection string `env:"DB_CONNECTION"`
+	Database     string `env:"DATABASE"`
 	LogDir       string `env:"LOG_DIR"`
-
-	SyncInterval int64 `env:"SYNC_INTERVAL"`
-	Debug        bool  `env:"DEBUG"`
+	SyncInterval int64  `env:"SYNC_INTERVAL"`
+	Debug        bool   `env:"DEBUG"`
 }
 
 var (

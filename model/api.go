@@ -76,7 +76,7 @@ func GetServiceAPIFromDB(db *gorm.DB) (map[string]*apiBase.ServiceAPI, error) {
 			retData[key] = &apiBase.ServiceAPI{
 				Host:           item.Host,
 				DisableExtract: item.DisableExtract > 0,
-				SignName:       item.Sign,
+				Sign:           item.Sign,
 				SignConfig:     signConfig,
 				Path:           tmpAPI.Path,
 				Method:         tmpAPI.Method,
@@ -85,5 +85,4 @@ func GetServiceAPIFromDB(db *gorm.DB) (map[string]*apiBase.ServiceAPI, error) {
 		}
 	}
 	return retData, nil
-
 }

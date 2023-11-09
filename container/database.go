@@ -3,12 +3,14 @@ package container
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/crackeer/goaway/model"
-	"github.com/crackeer/goaway/util/database"
 	apiBase "github.com/crackeer/simple_http"
+	"github.com/glebarez/sqlite"
 	"github.com/patrickmn/go-cache"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -21,14 +23,28 @@ func init() {
 	routerCache = cache.New(20*time.Minute, 30*time.Minute)
 }
 
+func GetModelDB() *gorm.DB {
+	return modelDB
+}
+
 // InitModel
 func InitModel() {
-	if db, err := database.Open(config.DBConnection); err != nil {
-		panic(fmt.Sprintf("open database `%s`: %v", config.DBConnection, err))
+	if db, err := open(config.Database); err != nil {
+		panic(fmt.Sprintf("open database `%s`: %v", config.Database, err))
 	} else {
 		modelDB = db
 	}
+}
+func open(connection string) (*gorm.DB, error) {
+	if strings.HasPrefix(connection, "mysql://") {
+		return gorm.Open(mysql.Open(connection[8:]), &gorm.Config{})
+	}
 
+	if strings.HasPrefix(connection, "sqlite://") {
+		return gorm.Open(sqlite.Open(connection[9:]), &gorm.Config{})
+	}
+
+	return nil, errors.New("not support")
 }
 
 func saveModel() {

@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/crackeer/gopkg v0.0.0-20230129040548-189d2e40a106
-	github.com/crackeer/simple_http v0.0.0-20230520123223-617f6921a047
+	github.com/crackeer/simple_http v0.0.0-20231109005041-73750ad8c3ff
 	github.com/gin-gonic/gin v1.8.1
 	github.com/glebarez/sqlite v1.9.0
 	github.com/gookit/color v1.4.2
