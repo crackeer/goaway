@@ -30,83 +30,34 @@
             <button class="btn btn-primary btn-sm" @click="showCreateModel()">新建服务</button>
         </div>
 
-        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-            <div class="panel panel-default" v-for="(item, i) in serviceList" style="margin-top: 20px;">
-                <div class="panel-body">
-                    <h4>
-                        {{item.name}}
-                        <small>{{item.host}}</small>
-                        <div style="float: right;">
-                            <button class="btn btn-sm btn-link" @click="showEditModal(item)">编辑</button>
-                            <button class="btn btn-sm btn-link" @click="showDeleteModal(item)">删除</button>
-                            <button class="btn btn-sm btn-link" @click="showCopyModal(item)">复制</button>
-                        </div>
-                    </h4>
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-4">
-                            <p><strong>唯一标识：</strong>{{item.service }}
-                            </p>
-                            <p><strong>超时：</strong>{{item.timeout }}<small>（ms）</small>
-                            </p>
-                            <p><strong>描述：</strong>{{item.description}}</p>
-                            <p><strong>创建时间：</strong>{{item.create_at}}</p>
-                            <p><strong>修改时间：</strong>{{item.modify_at}}</p>
-                        </div>
-                        <div class="col-md-4" style="border-left:1px solid gray;">
-                            <p><strong>签名算法：</strong>{{item.sign}}</p>
-                            <p><strong>签名配置：</strong>
-                                <textarea type="text" class="form-control" rows="3">{{item.sign_config}}</textarea>
-                            </p>
-                        </div>
-                        <div class="col-md-4" style="border-left:1px solid gray;">
-                            <p><strong>禁用response提取：</strong>{{item.disable_extract ? '是' : '否'}}</p>
-                            <template v-if="item.extract_response > 0">
-                                <p><strong>CodeKey：</strong>{{item.code_key}}</p>
-                                <p><strong>DataKey：</strong>{{item.data_key}}</p>
-                                <p><strong>MessageKey：</strong>{{item.message_key}}</p>
-                                <p><strong>SuccessCodeKey：</strong>{{item.success_code_key}}</p>
-                            </template>
-                        </div>
-                        <div class="col-md-12">
-                            <p>API列表
-                                <span style="display: inline-block;margin-left: 10px;"><button
-                                        class="btn btn-link btn-sm" @click="showCreateApiModal(item)">新增</button></span>
-                            </p>
-                            <div style="max-height: 300px; overflow-y: scroll;">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>API标识</th>
-                                            <th>Path</th>
-                                            <th>ContentType</th>
-                                            <th>Timeout(ms)</th>
-                                            <th colspan="2" style="text-align:center;">操作</th>
-                                        </tr>
-                                    <tbody>
-                                        <tr v-for="(api, i) in item.api_list">
-                                            <td>{{api.api}}</td>
-                                            <td>【{{api.method}}】{{api.path}}</td>
-                                            <td>{{api.content_type}}</td>
-                                            <td>{{api.timeout}}</td>
-                                            <td style="text-align:center;">
-                                                <a href="javascript:;" @click="showEditApiModal(api)">
-                                                    编辑
-                                                </a>
-                                            </td>
-                                            <td style="text-align:center;">
-                                                <a href="javascript:;" @click="showDeleteApiModal(api)">
-                                                    删除
-                                                </a>
-                                            </td>
-                                        </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>名字</th>
+                    <th>标识</th>
+                    <th>Host</th>
+                    <th>超时</th>
+                    <th>签名</th>
+                    <th style="text-align: center;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(item, i) in serviceList">
+                    <td>{{item.id}}</td>
+                    <td><a :href="'/page/service_api.html?service_id=' + item.id">{{item.name}}</a></td>
+                    <td><a :href="'/page/service_api.html?service_id=' + item.id">{{item.service}}</a></td>
+                    <td>{{item.host}}</td>
+                    <td>{{item.timeout}}</td>
+                    <td>{{item.sign || '无'}}</td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-sm btn-link" @click="showEditModal(item)">编辑</button>
+                        <button class="btn btn-sm btn-link" @click="showDeleteModal(item)">删除</button>
+                        <button class="btn btn-sm btn-link" @click="showCopyModal(item)">复制</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
         <div class="modal fade" tabindex="-1" role="dialog" id="myModal">
             <div class="modal-dialog modal-lg" role="document">
@@ -170,12 +121,10 @@
                                 <label for="response_config" class="control-label col-sm-2">禁用提取结果</label>
                                 <div class="col-sm-10">
                                     <label class="radio-inline">
-                                        <input type="radio" value="1" name="extract"
-                                            v-model="service.disable_extract">是
+                                        <input type="radio" value="1" name="extract" v-model="service.disable_extract">是
                                     </label>
                                     <label class="radio-inline">
-                                        <input type="radio" value="0" name="extract"
-                                            v-model="service.disable_extract">否
+                                        <input type="radio" value="0" name="extract" v-model="service.disable_extract">否
                                     </label>
                                 </div>
                             </div>
@@ -227,93 +176,16 @@
                         <h4 class="modal-title">复制到</h4>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <div class="form-group">
-                                <label for="recipient-name" class="control-label">环境</label>
-                                <input type="text" class="form-control" v-model="copyEnv">
-                            </div>
-                            <div class="form-group">
-                                <label for="recipient-name" class="control-label">快速选择</label>
-                                <select class="form-control" v-model="copyEnv">
-                                    <option v-for="item in envList">{{item}}</option>
-                                </select>
-                            </div>
+                        <div class="radio" v-for="item in envList">
+                            <label>
+                                <input type="radio" name="copyEnv" :value="item" v-model="copyEnv" :disabled="item == env">{{item}}
+                            </label>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
 
                         <button type="button" class="btn btn-primary" @click="doCopyService()">保存</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" tabindex="-1" role="dialog" id="myApiModal">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">{{ this.edit ? '修改API' : '新增API'}}</h4>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-horizontal">
-                            <div class="form-group">
-                                <label for="api" class="control-label col-sm-2">Path</label>
-                                <div class="col-sm-10">
-                                    <input type="text" class="form-control" v-model="api.path"
-                                        placeholder="your/path.json">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="api" class="control-label col-sm-2">api标识</label>
-                                <div class="col-sm-10">
-
-                                    <input type="text" class="form-control" v-model="api.api"
-                                        placeholder="your_path_id">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="method" class="control-label col-sm-2">method</label>
-                                <div class="col-sm-10">
-                                    <label class="radio-inline">
-                                        <input type="radio" name="method" value="GET" v-model="api.method">
-                                        GET
-                                    </label>
-                                    <label class="radio-inline">
-                                        <input type="radio" name="method" value="POST" v-model="api.method">
-                                        POST
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="content_type" class="control-label col-sm-2">ContentType</label>
-                                <div class="col-sm-10">
-                                    <select class="form-control" v-model="api.content_type">
-                                        <option value="none">无</option>
-                                        <option value="application/json">application/json</option>
-                                        <option value="text/plain">text/plain</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="timeout" class="control-label col-sm-2">超时时间（ms）</label>
-                                <div class="col-sm-10">
-                                    <input type="number" class="form-control" v-model="api.timeout" />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="description" class="control-label col-sm-2">描述</label>
-                                <div class="col-sm-10">
-                                    <textarea class="form-control" v-model="api.description"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        <button type="button" class="btn btn-primary" @click="doUpdateServiceAPI()">保存</button>
                     </div>
                 </div>
             </div>
@@ -331,7 +203,6 @@
     <script>
 
         $(document).ready(function () {
-            axios.defaults.headers.common['proxy'] = "storage";
             const PAGE_SIZE = 20
             var vm = Vue.createApp({
                 data() {
@@ -379,48 +250,12 @@
                         })
                     },
                     async getEnvList() {
-                        let result = await axios.post('/api/distinct/service', {
-                            "distinct": ['env']
-                        })
+                        let result = await axios.get('/env/list')
                         this.envList = result.data.data
                     },
                     async getServiceList() {
-                        let query = {}
-                        if (this.env != '_all_') {
-                            query['env'] = this.env
-                        }
-                        let result = await axios.post('/api/select/service', {
-                            'query': query,
-                            'offset': (this.page - 1) * PAGE_SIZE,
-                            'limit': PAGE_SIZE,
-                            'order_by': 'id desc',
-                        })
-
-                        let namespaces = []
-                        for (var i in result.data.data) {
-                            namespaces.push(result.data.data[i].service)
-                        }
-                        let result1 = await axios.post('/api/select/service_api', {
-                            'query': {
-                                'service': namespaces,
-                            },
-                            'order_by': 'id desc',
-                        })
-                        let serviceApiMap = {}
-                        for (var i in result1.data.data) {
-                            if (serviceApiMap[result1.data.data[i].service] == undefined) {
-                                serviceApiMap[result1.data.data[i].service] = []
-                            }
-                            serviceApiMap[result1.data.data[i].service].push(result1.data.data[i])
-                        }
-                        for (var i in result.data.data) {
-                            if (serviceApiMap[result.data.data[i].service] != undefined) {
-                                result.data.data[i].api_list = serviceApiMap[result.data.data[i].service]
-                            }
-                        }
+                        let result = await axios.get('/query/service?env=' + this.env)
                         this.serviceList = result.data.data
-                        console.log(result.data.data)
-
                     },
                     async showEditModal(item) {
                         this.service = cloneObject(item)
@@ -462,12 +297,7 @@
                                 'disable_extract': this.service.disable_extract,
                             }
 
-                            let result = await axios.post('/api/update/service', {
-                                'query': {
-                                    'id': this.service.id
-                                },
-                                'update': updateData,
-                            })
+                            let result = await axios.post('/modify/service/' + this.service.id, updateData)
                             if (result.data.code < 0) {
                                 alert(result.data.message)
                             } else {
@@ -487,10 +317,10 @@
                                 'code_key': this.service.code_key,
                                 'message_key': this.service.message_key,
                                 'success_code_key': this.service.success_code_key,
-                                'disable_extract': this.service.disable_extract,
+                                'disable_extract': parseInt(this.service.disable_extract),
                             }
 
-                            let result = await axios.post('/api/insert/service', [insertData])
+                            let result = await axios.post('/create/service', insertData)
                             if (result.data.code < 0) {
                                 alert(result.data.message)
                             } else {
@@ -506,11 +336,7 @@
                         })
                     },
                     async doDeleteService(serviceID) {
-                        let result = await axios.post('/api/delete/service', {
-                            'query': {
-                                'id': serviceID
-                            }
-                        })
+                        let result = await axios.post('/delete/service/' + serviceID)
                         if (result.data.code < 0) {
                             alert(result.data.message)
                         } else {
@@ -538,7 +364,7 @@
                             'disable_extract': this.service.disable_extract,
                         }
 
-                        let result = await axios.post('/api/insert/service', [insertData])
+                        let result = await axios.post('/create/service', insertData)
                         if (result.data.code < 0) {
                             alert(result.data.message)
                         } else {
@@ -548,108 +374,7 @@
                             })
                         }
                     },
-                    async showCreateApiModal(data) {
-                        this.edit = false
-                        this.service = data
-                        this.api = {
-                            api: '',
-                            path: '',
-                            method: 'GET',
-                            content_type: 'none',
-                            timeout: 4000,
-                            description: ''
-                        }
-                        $('#myApiModal').modal();
-                    },
-                    async showEditApiModal(item) {
-                        this.api = cloneObject(item)
-                        this.edit = true
-                        $('#myApiModal').modal()
-                    },
-                    async doUpdateServiceAPI() {
-                        if (this.edit) {
-                            let updateData = {
-                                'api': this.api.api,
-                                'path': this.api.path,
-                                'description': this.api.description,
-                                'method': this.api.method,
-                                'timeout': this.api.timeout,
-                                'content_type': this.api.content_type,
-                            }
-
-                            let result = await axios.post('/api/update/service_api', {
-                                'query': {
-                                    'id': this.api.id
-                                },
-                                'update': updateData,
-                            })
-                            if (result.data.code < 0) {
-                                alert(result.data.message)
-                            } else {
-                                simpleReload()
-                            }
-                        } else {
-                            let insertData = {
-                                'service': this.service.service,
-                                'api': this.api.api,
-                                'path': this.api.path,
-                                'description': this.api.description,
-                                'method': this.api.method,
-                                'timeout': this.api.timeout,
-                                'content_type': this.api.content_type,
-                            }
-
-                            let result = await axios.post('/api/insert/service_api', [insertData])
-                            if (result.data.code < 0) {
-                                alert(result.data.message)
-                            } else {
-                                simpleReload()
-                            }
-                        }
-                    },
-                    async showDeleteApiModal(item) {
-                        bootbox.confirm("确认删除`" + item.path + "`？", (result) => {
-                            if (result) {
-                                this.doDeleteServiceApi(item.id)
-                            }
-                        })
-                    },
-                    async doDeleteServiceApi(id) {
-                        let result = await axios.post('/api/delete/service_api', {
-                            'query': {
-                                'id': id
-                            }
-                        })
-                        if (result.data.code < 0) {
-                            alert(result.data.message)
-                        } else {
-                            simpleReload()
-                        }
-                    },
-                    async getSignList() {
-                        let result = await axios.post('/api/select/sign', {
-                            'query': {},
-                            'offset': (this.page - 1) * 100,
-                            'limit': 100,
-                            'order_by': 'id desc',
-                        })
-                        this.signList = result.data.data
-                    },
-                    async changeSignName(e) {
-                        if (e.target.value == '') {
-                            this.service.sign_config = ''
-                            return
-                        }
-
-                        for (var i in this.signList) {
-                            if (this.signList[i].name == e.target.value) {
-                                this.service.sign_config = this.signList[i].config_template
-                            }
-                        }
-
-                    }
-                },
-
+                }
             })
             vm.mount('#app')
         })

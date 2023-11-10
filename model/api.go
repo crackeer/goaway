@@ -14,6 +14,7 @@ type ServiceAPI struct {
 	Method      string `json:"method"`
 	Path        string `json:"path"`
 	Service     string `json:"service"`
+	Description string `json:"description"`
 	Timeout     int64  `json:"timeout"`
 }
 
@@ -26,6 +27,8 @@ type Service struct {
 	CodeKey        string `json:"code_key"`
 	DataKey        string `json:"data_key"`
 	Env            string `json:"env"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
 	DisableExtract int    `json:"disable_extract"`
 	Host           string `json:"host"`
 	MessageKey     string `json:"message_key"`

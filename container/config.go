@@ -6,14 +6,15 @@ import (
 )
 
 type AppConfig struct {
-	Env          string `env:"ENV"`
-	ConsolePort  int    `env:"CONSOLE_PORT"`
-	StaticDir    string `env:"STATIC_DIR"`
-	Port         int64  `env:"PORT"`
-	Database     string `env:"DATABASE"`
-	LogDir       string `env:"LOG_DIR"`
-	SyncInterval int64  `env:"SYNC_INTERVAL"`
-	Debug        bool   `env:"DEBUG"`
+	EnvList        []string `env:"ENV_LIST" envSeparator:","`
+	RouterCategory []string `env:"ROUTER_CATEGORY" envSeparator:","`
+	ConsolePort    int      `env:"CONSOLE_PORT"`
+	StaticDir      string   `env:"STATIC_DIR"`
+	Port           int64    `env:"PORT"`
+	Database       string   `env:"DATABASE"`
+	LogDir         string   `env:"LOG_DIR"`
+	SyncInterval   int64    `env:"SYNC_INTERVAL"`
+	Debug          bool     `env:"DEBUG"`
 }
 
 var (

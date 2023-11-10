@@ -17,11 +17,13 @@ type RouterConfig struct {
 
 // SqliteRouter
 type Router struct {
-	Mode     string `json:"mode"`
-	Path     string `json:"path"`
-	Request  string `json:"request"`
-	Response string `json:"response"`
-	Status   int    `json:"status"`
+	Mode        string `json:"mode"`
+	Category    string `json:"category"`
+	Path        string `json:"path"`
+	Request     string `json:"request"`
+	Response    string `json:"response"`
+	Status      int    `json:"status"`
+	Description string `json:"description"`
 }
 
 func (Router) TableName() string {

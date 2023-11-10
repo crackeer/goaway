@@ -43,7 +43,7 @@
                     <th>Path</th>
                     <th>模式</th>
                     <th>请求</th>
-                    <th>返回</th>
+                    <th>分类</th>
                     <th>描述</th>
                     <th>操作</th>
                 </tr>
@@ -53,7 +53,7 @@
                     <td>{{item.path}}</td>
                     <td>{{item.mode}}</td>
                     <td>{{item.request}}</td>
-                    <td><button class="btn btn-sm btn-link" @click="showResponse(item)">查看</button></td>
+                    <td>{{item.category}}</td>
                     <td>{{item.description}}</td>
                     <td>
                         <button class="btn btn-sm btn-link" @click="showEditModal(item)">编辑</button>
@@ -160,7 +160,6 @@
     <script>
 
         $(document).ready(function () {
-            axios.defaults.headers.common['proxy'] = "storage";
             window.jsonEditor = null;
             const PAGE_SIZE = 20
             var vm = Vue.createApp({
@@ -190,25 +189,11 @@
                 },
                 methods: {
                     async getServiceList() {
-                        let result = await axios.post('/api/select/service', {
-                            'query': {
-                                'env': 'default',
-                            },
-                            'offset': 0,
-                            'limit': 1000,
-                            'order_by': 'id desc',
-                        })
+                        let result = await axios.get('/query/service?env=default')
                         this.serviceList = result.data.data
                     },
                     async getServiceAPIList() {
-                        let result = await axios.post('/api/select/service_api', {
-                            'query': {
-                                'service': this.router.tmp_service,
-                            },
-                            'offset': 0,
-                            'limit': 1000,
-                            'order_by': 'id desc',
-                        })
+                        let result = await axios.get('/query/service_api?service=' + this.router.tmp_service)
                         this.serviceApiList = result.data.data
                     },
                     async clickClassify() {
@@ -230,22 +215,17 @@
                         })
                     },
                     async getClassifyList() {
-                        let result = await axios.post('/api/distinct/router', {
-                            "distinct": ['classify']
-                        })
+                        let result = await axios.get('/router/category')
                         this.classifyList = result.data.data
                     },
                     async getRouterList() {
                         let query = {}
+                        let url = "/query/router"
                         if (this.classify != '_all_') {
-                            query['classify'] = this.classify
+                            url += "?category=" + this.classify
                         }
-                        let result = await axios.post('/api/select/router', {
-                            'query': query,
-                            'offset': (this.page - 1) * PAGE_SIZE,
-                            'limit': PAGE_SIZE,
-                            'order_by': 'id desc',
-                        })
+                       
+                        let result = await axios.get(url)
 
                         this.routerList = result.data.data
                     },
@@ -293,7 +273,7 @@
                         let updateData = {
                             'path': this.router.path,
                             'status': 0,
-                            'classify': this.router.classify,
+                            'category': this.router.classify,
                             'mode': this.router.mode,
                             'request': '',
                             'response': JSON.stringify(window.jsonEditor.get()),
@@ -307,19 +287,14 @@
                             updateData['request'] = this.router.tmp_service + '/' + this.router.tmp_api
                         }
                         if (this.edit) {
-                            let result = await axios.post('/api/update/router', {
-                                'query': {
-                                    'id': this.router.id
-                                },
-                                'update': updateData,
-                            })
+                            let result = await axios.post('/modify/router/' + this.router.id, updateData)
                             if (result.data.code < 0) {
                                 alert(result.data.message)
                             } else {
                                 simpleReload()
                             }
                         } else {
-                            let result = await axios.post('/api/insert/router', [updateData])
+                            let result = await axios.post('/create/router', updateData)
                             if (result.data.code < 0) {
                                 alert(result.data.message)
                             } else {
@@ -335,11 +310,7 @@
                         })
                     },
                     async doDeleteRouter(id) {
-                        let result = await axios.post('/api/delete/router', {
-                            'query': {
-                                'id': id
-                            }
-                        })
+                        let result = await axios.post('/delete/router/' + id)
                         if (result.data.code < 0) {
                             alert(result.data.message)
                         } else {
@@ -351,7 +322,6 @@
                         $('#copyModal').modal()
                     },
                     async showResponse(item) {
-                       
                         bootbox.alert(item.response)
                     }
                 },

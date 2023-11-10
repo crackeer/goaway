@@ -34,10 +34,16 @@ func RunConsole() error {
 	router := gin.New()
 	router.RedirectFixedPath = false
 	router.RedirectTrailingSlash = false
-	router.POST("/delte/:table/:id", ginHelper.DoResponseJSON(), deleteData)
-	router.POST("/create/:table", ginHelper.DoResponseJSON(), deleteData)
+	router.POST("/delete/:table/:id", ginHelper.DoResponseJSON(), deleteData)
+	router.POST("/create/:table", ginHelper.DoResponseJSON(), createData)
 	router.POST("/modify/:table/:id", ginHelper.DoResponseJSON(), modifyData)
 	router.GET("/query/:table", ginHelper.DoResponseJSON(), queryData)
+	router.GET("/env/list", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
+		ginHelper.Success(ctx, container.GetAppConfig().EnvList)
+	})
+	router.GET("/router/category", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
+		ginHelper.Success(ctx, container.GetAppConfig().RouterCategory)
+	})
 	router.NoRoute(createStaticHandler(http.Dir(cfg.StaticDir)))
 	return router.Run(fmt.Sprintf(":%d", cfg.ConsolePort))
 }
@@ -53,8 +59,12 @@ func getDataID(ctx *gin.Context) int64 {
 }
 
 func deleteData(ctx *gin.Context) {
+	if dataID := getDataID(ctx); dataID < 1 {
+		ginHelper.Failure(ctx, -1, "data id = 0")
+		return
+	}
 	db := container.GetModelDB()
-	result := db.Exec("DELETE FROM ? where id = ?", getTable(ctx), getDataID(ctx))
+	result := db.Exec(fmt.Sprintf("DELETE FROM %s where id = %d", getTable(ctx), getDataID(ctx)))
 	if result.Error != nil {
 		ginHelper.Failure(ctx, -1, result.Error.Error())
 	} else {
@@ -116,6 +126,10 @@ func bindRouter(ctx *gin.Context) (*model.Router, error) {
 }
 
 func modifyData(ctx *gin.Context) {
+	if dataID := getDataID(ctx); dataID < 1 {
+		ginHelper.Failure(ctx, -1, "data id = 0")
+		return
+	}
 	db := container.GetModelDB()
 	updateData := ginHelper.AllPostParams(ctx)
 	result := db.Table(getTable(ctx)).Where(map[string]interface{}{"id": getDataID(ctx)}).Updates(updateData)
@@ -128,6 +142,18 @@ func modifyData(ctx *gin.Context) {
 	}
 }
 
+func queryData(ctx *gin.Context) {
+	var (
+		list []map[string]interface{}
+	)
+	db := container.GetModelDB()
+	query := ginHelper.AllGetParams(ctx)
+
+	db.Table(getTable(ctx)).Where(query).Order("id desc").Find(&list)
+	ginHelper.Success(ctx, list)
+}
+
+/*
 func queryData(ctx *gin.Context) {
 	var (
 		page      int = 1
@@ -164,3 +190,4 @@ func queryData(ctx *gin.Context) {
 		"total_page":   totalPage,
 	})
 }
+*/
