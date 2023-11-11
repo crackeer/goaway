@@ -6,6 +6,7 @@ import (
 )
 
 type AppConfig struct {
+	Env            string   `json:"env"`
 	EnvList        []string `env:"ENV_LIST" envSeparator:","`
 	RouterCategory []string `env:"ROUTER_CATEGORY" envSeparator:","`
 	ConsolePort    int      `env:"CONSOLE_PORT"`

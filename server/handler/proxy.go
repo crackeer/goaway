@@ -3,7 +3,7 @@ package handler
 import (
 	"strings"
 
-	giner "github.com/crackeer/gopkg/gin"
+	ginHelper "github.com/crackeer/gopkg/gin"
 	api "github.com/crackeer/simple_http"
 	"github.com/gin-gonic/gin"
 )
@@ -14,13 +14,13 @@ import (
 func Proxy(ctx *gin.Context) {
 	apiName := ctx.Param("api")
 	apiName = strings.TrimLeft(apiName, "/")
-	input := giner.AllParams(ctx)
-	header := giner.AllHeader(ctx)
+	input := ginHelper.AllParams(ctx)
+	header := ginHelper.AllHeader(ctx)
 	response, err := api.RequestByName(apiName, input, header)
 	if err != nil {
-		giner.Success(ctx, err.Error())
+		ginHelper.Success(ctx, err.Error())
 	} else {
-		giner.Success(ctx, response)
+		ginHelper.Success(ctx, response)
 	}
 
 }

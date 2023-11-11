@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="Description">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>路由</title>
+    <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
+    <link rel="stylesheet" href="/assets/css/my.css" />
+    <script src="/assets/js/jquery.js"></script>
+    <script src="/assets/js/bootstrap.min.js"></script>
+    <script src="/assets/js/vue.global.js"></script>
+    <script src="/assets/js/axios.min.js"></script>
+    <script src="/assets/js/bootbox.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/page/header.js"></script>
+    <script src="/assets/js/jsoneditor9.8.js"></script>
+    <link href="/assets/css/jsoneditor9.8.css" rel="stylesheet" />
+
+
+<body>
+    <div id="header"></div>
+    <div id="app"></div>
+    <template id="template">
+        <div style="padding: 1px 0 10px;">
+            <label class="radio-inline">
+                <input type="radio" name="env" value="all" v-model="category" @change="clickCategory">全部
+            </label>
+            <label class="radio-inline" v-for="(item, i) in categoryList">
+                <input type="radio" name="env" :value="item" v-model="category" @change="clickCategory">{{item}}
+            </label>
+        </div>
+        <div style="margin: 15px 0;">
+            <button class="btn btn-primary btn-sm" @click="showCreateModel()">新建路由</button>
+        </div>
+
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Path</th>
+                    <th>模式</th>
+                    <th>请求</th>
+                    <th>分类</th>
+                    <th>描述</th>
+                    <th>操作</th>
+                </tr>
+            <tbody>
+                <tr v-for="(item, i) in this.routerList">
+                    <td>{{item.id}}</td>
+                    <td>{{item.path}}</td>
+                    <td>{{item.mode}}</td>
+                    <td>{{item.request || '无'}}</td>
+                    <td>{{item.category}}</td>
+                    <td>{{item.description}}</td>
+                    <td>
+                        <button class="btn btn-sm btn-link" @click="showEditModal(item)">编辑</button>
+                        <button class="btn btn-sm btn-link" @click="showDeleteModal(item)">删除</button>
+                        <button class="btn btn-sm btn-link" @click="showCopyModal(item)">复制</button>
+                    </td>
+                </tr>
+        </table>
+
+        <div class="modal fade" tabindex="-1" role="dialog" id="myModal">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">{{ this.edit ? '修改' : '创建'}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label for="path" class="control-label col-sm-2">路径</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" v-model="router.path">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="description" class="control-label col-sm-2">分类</label>
+                                <div class="col-sm-10">
+                                    <select class="form-control" v-model="router.category">
+                                        <template v-for="item in categoryList">
+                                            <option :value="item">{{item}}</option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="request_type" class="control-label col-sm-2">方式</label>
+                                <div class="col-sm-10">
+                                    <label class="radio-inline">
+                                        <input type="radio" name="mode" value="static" v-model="router.mode">
+                                        静态
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" name="mode" value="relay" v-model="router.mode">
+                                        代理
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group" v-if="router.mode == 'relay'">
+                                <label for="request_config" class="control-label col-sm-2">请求配置</label>
+                                <div class="col-sm-5">
+                                    <select class="form-control" v-model="router.tmp_service"
+                                        @change="getServiceAPIList">
+                                        <template v-for="item in serviceList">
+                                            <option :value="item.service">{{item.name}}</option>
+                                        </template>
+                                    </select>
+                                    <span class="help-block">服务</span>
+                                </div>
+                                <div class="col-sm-5">
+                                    <select class="form-control" v-model="router.tmp_api">
+                                        <template v-for="item in serviceApiList">
+                                            <option :value="item.api">[{{item.method}}]{{item.path}}</option>
+                                        </template>
+                                    </select>
+                                    <span class="help-block">接口</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="response_type" class="control-label col-sm-2">返回</label>
+                                <div class="col-sm-10">
+                                    <div id="jsoneditor" style="width: 100%; height: 300px"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="description" class="control-label col-sm-2">描述</label>
+                                <div class="col-sm-10">
+                                    <textarea class="form-control" v-model="router.description"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" @click="doUpdateRouter()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <script>
+
+        $(document).ready(function () {
+            window.jsonEditor = null;
+            var vm = Vue.createApp({
+                data() {
+                    let list = []
+                    return {
+                        serviceList: [],
+                        serviceApiList: [],
+                        categoryList: [],
+                        routerList: [],
+                        category: "",
+
+                        router: {},
+                        edit: false,
+                    }
+                },
+                template: '#template',
+                async mounted() {
+                    this.category = getQuery('category', 'all')
+                    await this.getRouterCategory()
+                    await this.getRouterList()
+                    this.getServiceList()
+                },
+                methods: {
+                    async getServiceList() {
+                        let result = await axios.get('/query/service?env=default')
+                        this.serviceList = result.data.data
+                    },
+                    async getServiceAPIList() {
+                        let result = await axios.get('/query/service_api?service=' + this.router.tmp_service)
+                        this.serviceApiList = result.data.data
+                    },
+                    async clickCategory() {
+                        reloadWith({
+                            category: this.category,
+                        })
+                    },
+                    async getRouterCategory() {
+                        let result = await axios.get('/router/category')
+                        this.categoryList = result.data.data
+                    },
+                    async getRouterList() {
+                        let query = {}
+                        let url = "/query/router"
+                        if (this.category != 'all') {
+                            url += "?category=" + this.category
+                        }
+                        let result = await axios.get(url)
+                        this.routerList = result.data.data
+                    },
+                    async showEditModal(item) {
+                        let editData = cloneObject(item)
+                        if(item.mode == 'relay') {
+                            let parts = item.service_api.split('/')
+                            editData['tmp_service'] = parts[0]
+                            editData['tmp_api'] = parts[1]
+                        }
+                        this.getServiceAPIList()
+                        this.router = editData
+
+                        this.edit = true
+                        $('#myModal').modal()
+                        if (window.jsonEditor == null) {
+                            window.jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), {
+                                "mode": "code",
+                                "search": true,
+                                "indentation": 4
+                            })
+                        }
+                        window.jsonEditor.set(JSON.parse(item.response))
+                    },
+                    async showCreateModel() {
+                        window.location.href = "/page/router/create.html"
+                    },
+                    async doUpdateRouter() {
+                        let updateData = {
+                            'path': this.router.path,
+                            'status': 0,
+                            'category': this.router.category,
+                            'mode': this.router.mode,
+                            'service_api': '',
+                            'response': JSON.stringify(window.jsonEditor.get()),
+                            'description': this.router.description,
+                        }
+                        if (this.router.mode == 'relay') {
+                            if (this.router.tmp_service.length < 1 || this.router.tmp_api.length < 1) {
+                                bootbox.alert('请选择转发的API')
+                                return
+                            }
+                            updateData['service_api'] = this.router.tmp_service + '/' + this.router.tmp_api
+                        }
+                        if (this.edit) {
+                            let result = await axios.post('/modify/router/' + this.router.id, updateData)
+                            if (result.data.code < 0) {
+                                alert(result.data.message)
+                            } else {
+                                simpleReload()
+                            }
+                        } else {
+                            let result = await axios.post('/create/router', updateData)
+                            if (result.data.code < 0) {
+                                alert(result.data.message)
+                            } else {
+                                simpleReload()
+                            }
+                        }
+                    },
+                    async showDeleteModal(item) {
+                        bootbox.confirm("确认删除`" + item.path + "`？", (result) => {
+                            if (result) {
+                                this.doDeleteRouter(item.id)
+                            }
+                        })
+                    },
+                    async doDeleteRouter(id) {
+                        let result = await axios.post('/delete/router/' + id)
+                        if (result.data.code < 0) {
+                            alert(result.data.message)
+                        } else {
+                            simpleReload()
+                        }
+                    },
+                    async showCopyModal(item) {
+                        this.service = item
+                        $('#copyModal').modal()
+                    },
+                    async showResponse(item) {
+                        bootbox.alert(item.response)
+                    }
+                },
+
+            })
+            vm.mount('#app')
+        })
+    </script>
+</body>
+
+</html>

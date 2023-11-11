@@ -53,7 +53,7 @@ func saveModel() {
 		routerCache.Set(path, value, cache.DefaultExpiration)
 	}
 
-	apis, _ := model.GetServiceAPIFromDB(modelDB)
+	apis, _ := model.GetServiceAPIFromDB(modelDB, config.Env)
 	for name, value := range apis {
 		apiBase.RegisterServiceAPI(name, value)
 	}

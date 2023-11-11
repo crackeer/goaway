@@ -45,8 +45,8 @@
             <tbody>
                 <tr v-for="(item, i) in serviceList">
                     <td>{{item.id}}</td>
-                    <td><a :href="'/page/service_api.html?service_id=' + item.id">{{item.name}}</a></td>
-                    <td><a :href="'/page/service_api.html?service_id=' + item.id">{{item.service}}</a></td>
+                    <td><a :href="'/page/service/detailapi.html?service_id=' + item.id">{{item.name}}</a></td>
+                    <td><a :href="'/page/service/detail.html?service_id=' + item.id">{{item.service}}</a></td>
                     <td>{{item.host}}</td>
                     <td>{{item.timeout}}</td>
                     <td>{{item.sign || '无'}}</td>
@@ -178,7 +178,8 @@
                     <div class="modal-body">
                         <div class="radio" v-for="item in envList">
                             <label>
-                                <input type="radio" name="copyEnv" :value="item" v-model="copyEnv" :disabled="item == env">{{item}}
+                                <input type="radio" name="copyEnv" :value="item" v-model="copyEnv"
+                                    :disabled="item == env">{{item}}
                             </label>
                         </div>
                     </div>

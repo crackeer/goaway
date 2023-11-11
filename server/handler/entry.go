@@ -1,10 +1,11 @@
 package handler
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/crackeer/goaway/container"
-	giner "github.com/crackeer/gopkg/gin"
+	ginHelper "github.com/crackeer/gopkg/gin"
 	api "github.com/crackeer/simple_http"
 	"github.com/gin-gonic/gin"
 )
@@ -17,26 +18,43 @@ func Handle(ctx *gin.Context) {
 	path = strings.Trim(path, "/")
 	config, err := container.GetRouter(path)
 	if err != nil {
-		giner.Failure(ctx, -1, err.Error())
+		ginHelper.Failure(ctx, -1, err.Error())
 		return
 	}
 	if config.Mode == "static" {
-		giner.Success(ctx, config.Response)
+		ginHelper.Success(ctx, config.Response)
 		return
 	}
 
-	input := giner.AllParams(ctx)
-	header := giner.AllHeader(ctx)
-	response, err := api.RequestByName(config.ProxyAPI+":default", input, header)
+	input := ginHelper.AllParams(ctx)
+	header := ginHelper.AllHeader(ctx)
+	data, _ := json.Marshal(map[string]interface{}{
+		"input":  input,
+		"header": header,
+	})
+	if config.Header != nil {
+		tmp := jsonValue(config.Input, data)
+		if value, ok := tmp.(map[string]string); ok {
+			header = value
+		}
+	}
+	if config.Input != nil {
+		tmp := jsonValue(config.Input, data)
+		if value, ok := tmp.(map[string]interface{}); ok {
+			input = value
+		}
+	}
+
+	response, err := api.RequestByName(config.ProxyAPI, input, header)
 	if err != nil {
-		giner.Failure(ctx, -1, err.Error())
+		ginHelper.Failure(ctx, -1, err.Error())
 		return
 	}
 
 	if response.Error {
-		giner.Failure(ctx, -1, response.Message)
+		ginHelper.Failure(ctx, -1, response.Message)
 		return
 	}
 
-	giner.Success(ctx, response.Data)
+	ginHelper.Success(ctx, response.Data)
 }

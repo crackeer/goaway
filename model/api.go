@@ -48,18 +48,28 @@ func (Service) TableName() string {
 //	@param File
 //	@return map[string]*apiBase.ServiceAPI
 //	@return error
-func GetServiceAPIFromDB(db *gorm.DB) (map[string]*apiBase.ServiceAPI, error) {
-	serviceList := []Service{}
-	db.Model(&Service{}).Find(&serviceList)
+func GetServiceAPIFromDB(db *gorm.DB, env string) (map[string]*apiBase.ServiceAPI, error) {
+	defaultServiceList := []*Service{}
+	envServiceList := []*Service{}
+	db.Model(&Service{}).Where(map[string]interface{}{
+		"env": "default",
+	}).Find(&defaultServiceList)
+	if len(env) > 0 {
+		db.Model(&Service{}).Where(map[string]interface{}{
+			"env": env,
+		}).Find(&envServiceList)
+	}
+	useServiceList := mergeServiceList(defaultServiceList, envServiceList)
 
 	services := []string{}
-	for _, service := range serviceList {
+	for _, service := range useServiceList {
 		services = append(services, service.Service)
 	}
 	apis := []ServiceAPI{}
 	db.Model(&ServiceAPI{}).Where(map[string]interface{}{
 		"service": services,
 	}).Find(&apis)
+
 	apiGroup := map[string][]ServiceAPI{}
 	for _, item := range apis {
 		if _, ok := apiGroup[item.Service]; !ok {
@@ -68,12 +78,9 @@ func GetServiceAPIFromDB(db *gorm.DB) (map[string]*apiBase.ServiceAPI, error) {
 		apiGroup[item.Service] = append(apiGroup[item.Service], item)
 	}
 	retData := map[string]*apiBase.ServiceAPI{}
-	for _, item := range serviceList {
-		if _, ok := apiGroup[item.Service]; !ok {
-			continue
-		}
+	for _, item := range useServiceList {
 		for _, tmpAPI := range apiGroup[item.Service] {
-			key := fmt.Sprintf("%s/%s:%s", item.Service, tmpAPI.API, item.Env)
+			key := fmt.Sprintf("%s/%s", item.Service, tmpAPI.API)
 			signConfig := map[string]interface{}{}
 			json.Unmarshal([]byte(item.SignConfig), &signConfig)
 			retData[key] = &apiBase.ServiceAPI{
@@ -88,4 +95,21 @@ func GetServiceAPIFromDB(db *gorm.DB) (map[string]*apiBase.ServiceAPI, error) {
 		}
 	}
 	return retData, nil
+}
+
+func mergeServiceList(defaultServiceList, envServiceList []*Service) []*Service {
+	mapService := make(map[string]*Service)
+	for _, service := range defaultServiceList {
+		mapService[service.Service] = service
+	}
+
+	for _, service := range envServiceList {
+		mapService[service.Service] = service
+	}
+
+	list := []*Service{}
+	for _, service := range mapService {
+		list = append(list, service)
+	}
+	return list
 }
