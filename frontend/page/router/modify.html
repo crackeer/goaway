@@ -22,14 +22,15 @@
 
 <body>
     <div id="header"></div>
-    <div class="row">
-        <div class="col-offset-2">
-            <h2>创建路由<small>Subtext for header</small></h2>
-            <hr />
-        </div>
-    </div>
+
     <div id="app"></div>
     <template id="template">
+        <div class="row">
+            <div class="col-offset-2">
+                <h2>修改路由：<small>{{router.path}}</small></h2>
+                <hr />
+            </div>
+        </div>
         <div class="form-horizontal">
             <div class="form-group">
                 <label for="description" class="control-label col-sm-2">路由分类</label>
@@ -39,12 +40,6 @@
                             <option :value="item">{{item}}</option>
                         </template>
                     </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="path" class="control-label col-sm-2">路由path</label>
-                <div class="col-sm-8">
-                    <input type="text" class="form-control" v-model="router.path">
                 </div>
             </div>
 
@@ -104,7 +99,7 @@
         </div>
         <hr />
         <div style="text-align: center;">
-            <button class="btn btn-primary" @click="doCreateRouter()">创建</button>
+            <button class="btn btn-primary" @click="doModifyRouter()">修改</button>
         </div>
     </template>
     <script>
@@ -117,6 +112,7 @@
                 data() {
                     let list = []
                     return {
+                        routerId: 0,
                         serviceList: [],
                         serviceApiList: [],
                         categoryList: [],
@@ -129,21 +125,46 @@
                 },
                 template: '#template',
                 async mounted() {
-                    this.category = getQuery('category', '')
+                    this.routerId = getQuery('router_id', 0)
+                    if (this.routerId < 1) {
+                        window.location.href = '/page/router/list.html'
+                        return
+                    }
                     await this.getRouterCategory()
-                    this.getServiceList()
+                    await this.getServiceList()
+                    await this.getRouter()
                     if (window.jsonEditor == null) {
-                        window.jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), {
-                            "mode": "code",
-                            "search": true,
-                            "indentation": 4
-                        })
+
                     }
                 },
                 methods: {
                     async getServiceList() {
                         let result = await axios.get('/query/service?env=default')
                         this.serviceList = result.data.data
+                    },
+                    async getRouter() {
+                        let result = await axios.get('/query/router?id=' + this.routerId)
+                        if (result.data.data.length < 1) {
+                            window.location.href = '/page/router/list.html'
+                            return
+                        }
+                        let tmp = result.data.data[0]
+                        let parts = tmp['service_api'].split('/')
+                        if (parts.length >= 2) {
+                            tmp['tmp_service'] = parts[0]
+                            tmp['tmp_api'] = parts[1]
+                        } else {
+                            tmp['tmp_service'] = ''
+                            tmp['tmp_api'] = ''
+                        }
+                        this.router = tmp
+                        if (this.router.tmp_service.length > 0) {
+                            this.getServiceAPIList()
+                        }
+                        this.category = tmp.category
+                        setTimeout(() => {
+                            this.initJSONEditor(tmp.mode, tmp.input, tmp.header, tmp.response)
+                        }, 300)
                     },
                     async getServiceAPIList() {
                         let result = await axios.get('/query/service_api?service=' + this.router.tmp_service)
@@ -167,26 +188,62 @@
                             })
                         }
                     },
-                    async doCreateRouter() {
-                        let insertData = {
-                            'path': this.router.path,
-                            'status': 0,
+                    initJSONEditor(mode, input, header, response) {
+                        if (mode == 'relay') {
+                            window.jsonEditor1 = new JSONEditor(document.getElementById("jsoneditor1"), {
+                                "mode": "code",
+                                "search": true,
+                                "indentation": 4
+                            })
+                            try {
+                                let value = JSON.parse(input)
+                                window.jsonEditor1.set(value)
+                            } catch (e) {
+
+                            }
+
+                            window.jsonEditor2 = new JSONEditor(document.getElementById("jsoneditor2"), {
+                                "mode": "code",
+                                "search": true,
+                                "indentation": 4
+                            })
+                            try {
+                                let value = JSON.parse(header)
+                                window.jsonEditor2.set(value)
+                            } catch (e) {
+
+                            }
+                        }
+                        window.jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), {
+                            "mode": "code",
+                            "search": true,
+                            "indentation": 4
+                        })
+                        try {
+                            let value = JSON.parse(response)
+                            window.jsonEditor.set(value)
+                        } catch (e) {
+
+                        }
+                    },
+                    async doModifyRouter() {
+                        let modifyData = {
                             'category': this.category,
                             'mode': this.router.mode,
                             'service_api': '',
                             'response': JSON.stringify(window.jsonEditor.get()),
+                            'header': JSON.stringify(window.jsonEditor2.get()),
+                            'input': JSON.stringify(window.jsonEditor1.get()),
                         }
                         if (this.router.mode == 'relay') {
                             if (this.router.tmp_service.length < 1 || this.router.tmp_api.length < 1) {
                                 bootbox.alert('请选择转发的API')
                                 return
                             }
-                            insertData['service_api'] = this.router.tmp_service + '/' + this.router.tmp_api
-                            insertData['header'] = JSON.stringify(window.jsonEditor2.get())
-                            insertData['input'] = JSON.stringify(window.jsonEditor1.get())
+                            modifyData['service_api'] = this.router.tmp_service + '/' + this.router.tmp_api
                         }
 
-                        let result = await axios.post('/create/router', insertData)
+                        let result = await axios.post('/modify/router/' + this.routerId, modifyData)
                         if (result.data.code < 0) {
                             alert(result.data.message)
                         } else {

@@ -44,7 +44,6 @@
                     <th>模式</th>
                     <th>请求</th>
                     <th>分类</th>
-                    <th>描述</th>
                     <th>操作</th>
                 </tr>
             <tbody>
@@ -52,9 +51,8 @@
                     <td>{{item.id}}</td>
                     <td>{{item.path}}</td>
                     <td>{{item.mode}}</td>
-                    <td>{{item.request || '无'}}</td>
+                    <td>{{item.service_api || '无'}}</td>
                     <td>{{item.category}}</td>
-                    <td>{{item.description}}</td>
                     <td>
                         <button class="btn btn-sm btn-link" @click="showEditModal(item)">编辑</button>
                         <button class="btn btn-sm btn-link" @click="showDeleteModal(item)">删除</button>
@@ -197,6 +195,9 @@
                         this.routerList = result.data.data
                     },
                     async showEditModal(item) {
+                        let url = "/page/router/modify.html?router_id=" + item.id
+                        window.location.href = url
+                        return
                         let editData = cloneObject(item)
                         if(item.mode == 'relay') {
                             let parts = item.service_api.split('/')
@@ -218,7 +219,11 @@
                         window.jsonEditor.set(JSON.parse(item.response))
                     },
                     async showCreateModel() {
-                        window.location.href = "/page/router/create.html"
+                        let url = "/page/router/create.html"
+                        if (this.category != 'all') {
+                            url += "?category=" + this.category
+                        }
+                        window.location.href = url
                     },
                     async doUpdateRouter() {
                         let updateData = {
