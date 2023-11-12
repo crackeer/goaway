@@ -191,15 +191,6 @@
                 </div>
             </div>
         </div>
-
-        <div style="text-align: center;">
-            <div style="margin: 10px auto;">
-                <button type="button" class="btn btn-link" v-if="page > 1" @click="prev()">上一页</button>
-                <span style="font-size: 16px;">第{{page}}页 </span>
-                <button type="button" class="btn btn-link" @click="next()"
-                    v-if="serviceList.length >= pageSize">下一页</button>
-            </div>
-        </div>
     </template>
     <script>
 
