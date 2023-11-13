@@ -21,6 +21,46 @@
     <div id="header"></div>
     <div id="app"></div>
     <template id="template">
+        <h2>服务详情：<small>{{service.host}}（环境：{{service.env}}）</small></h2>
+        <hr />
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label for="description" class="control-label col-sm-2">名字</label>
+                <div class="col-sm-8">
+                    <p class="form-control-static">{{service.name}}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description" class="control-label col-sm-2">唯一标识</label>
+                <div class="col-sm-8">
+                    <p class="form-control-static">{{service.service}}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description" class="control-label col-sm-2">超时控制</label>
+                <div class="col-sm-8">
+                    <p class="form-control-static">{{service.timeout}}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description" class="control-label col-sm-2">签名算法</label>
+                <div class="col-sm-8">
+                    <p class="form-control-static">{{service.sign}}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description" class="control-label col-sm-2">签名配置</label>
+                <div class="col-sm-8">
+                    <textarea class="form-control" rows="3">{{service.sign_config}}</textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description" class="control-label col-sm-2">禁用提取结果</label>
+                <div class="col-sm-8">
+                    <p class="form-control-static">{{service.disable_extract > 0 ? '是' : '否'}}</p>
+                </div>
+            </div>
+        </div>
         <div style="padding: 1px 0 10px;">
             <label class="radio-inline" v-for="(item, i) in envList">
                 <input type="radio" name="env" :value="item" v-model="env" @change="clickEnv">{{item}}

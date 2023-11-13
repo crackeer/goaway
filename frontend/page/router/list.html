@@ -33,7 +33,7 @@
             </label>
         </div>
         <div style="margin: 15px 0;">
-            <button class="btn btn-primary btn-sm" @click="showCreateModel()">新建路由</button>
+            <button class="btn btn-primary" @click="gotoCreate()">新建路由</button>
         </div>
 
         <table class="table table-striped table-bordered">
@@ -125,6 +125,13 @@
                     },
                     async gotoEdit(item) {
                         window.location.href = "/page/router/modify.html?router_id=" + item.id
+                    },
+                    async gotoCreate(item) {
+                        let url = "/page/router/create.html"
+                        if(this.category != 'all') {
+                            url += "?category=" + this.category
+                        }
+                        window.location.href = url
                     },
                     async gotoDoc(item) {
                         window.location.href = "/page/router/doc.html?router_id=" + item.id
