@@ -109,11 +109,11 @@
                                 <div class="col-sm-10">
                                     <select class="form-control" v-model="service.sign" @change="changeSignName">
                                         <option value="">无</option>
-                                        <option v-for="item in signList" :value="item.name">{{item.name}}</option>
+                                        <option v-for="item in signList" :value="item.sign">{{item.sign}}</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" v-if="service.sign != undefined && service.sign.length > 0">
                                 <label for="sign_config" class="control-label col-sm-2">签名配置</label>
                                 <div class="col-sm-10">
                                     <div id="jsoneditor" style="width: 100%; height: 220px"></div>
@@ -230,21 +230,22 @@
                             page: 1,
                         })
                     },
-                    async next() {
-                        reloadWith({
-                            env: this.env,
-                            page: this.page + 1,
-                        })
-                    },
-                    async prev() {
-                        reloadWith({
-                            env: this.env,
-                            page: this.page - 1,
-                        })
-                    },
                     async getEnvList() {
                         let result = await axios.get('/env/list')
                         this.envList = result.data.data
+                    },
+                    async getSignList() {
+                        let result = await axios.get('/sign/list')
+                        this.signList = result.data.data
+                    },
+                    async changeSignName() {
+                        for (var i in this.signList) {
+                            if (this.signList[i].sign == this.service.sign) {
+                                this.service.sign_config = JSON.stringify(this.signList[i].sign_config_template)
+                            }
+                        }
+                        console.log(this.service.sign, this.service.sign_config)
+                        this.initJSONEditor()
                     },
                     async getServiceList() {
                         let result = await axios.get('/query/service?env=' + this.env)
@@ -254,23 +255,27 @@
                         this.service = cloneObject(item)
                         this.edit = true
                         $('#myModal').modal()
-                        this.initJSONEditor(this.service.sign_config)
+                        this.initJSONEditor()
                     },
-                    initJSONEditor(value) {
-                        if (window.jsonEditor == null) {
-                            setTimeout(() => {
-                                window.jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), {
-                                    "mode": "code",
-                                    "search": true,
-                                    "indentation": 4
-                                })
+                    initJSONEditor() {
+                        if (this.service.sign == undefined || this.service.sign.length < 1) {
+                            return
+                        }
+
+                        setTimeout(() => {
+                            window.jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), {
+                                "mode": "code",
+                                "search": true,
+                                "indentation": 4
+                            })
+                            if (this.service.sign_config.length > 0) {
                                 try {
-                                    let jsonValue = JSON.parse(value)
+                                    let jsonValue = JSON.parse(this.service.sign_config)
                                     window.jsonEditor.set(jsonValue)
                                 } catch (e) {
                                 }
-                            }, 300);
-                        }
+                            }
+                        }, 300);
                     },
                     async showCreateModel() {
                         this.service = {

@@ -9,6 +9,7 @@ import (
 	"github.com/crackeer/goaway/container"
 	"github.com/crackeer/goaway/model"
 	ginHelper "github.com/crackeer/gopkg/gin"
+	apiBase "github.com/crackeer/simple_http"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -43,6 +44,18 @@ func RunConsole() error {
 	})
 	router.GET("/router/category", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
 		ginHelper.Success(ctx, container.GetAppConfig().RouterCategory)
+	})
+	router.GET("/sign/list", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
+		list := apiBase.GetSignHandleMap()
+		retData := []map[string]interface{}{}
+		for _, v := range list {
+			retData = append(retData, map[string]interface{}{
+				"sign":                 v.ID(),
+				"introduction":         v.Introduction(),
+				"sign_config_template": v.SignConfigTemplate(),
+			})
+		}
+		ginHelper.Success(ctx, retData)
 	})
 	router.NoRoute(createStaticHandler(http.Dir(cfg.StaticDir)))
 	return router.Run(fmt.Sprintf(":%d", cfg.ConsolePort))
