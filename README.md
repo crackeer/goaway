@@ -1,14 +1,16 @@
-## Introduction
+# Introduction
 
 dynamic create router and make it works, you can choose different proxy types, `mesh`, `relay` or `static`
 
-## install
+# install
 
+## 1. go build
 ```bash
 git clone git@github.com:crackeer/go-gateway.git
 go build main.go
 ```
-a `.env` file looks like this
+
+## 2. .env file looks like this
 
 ```env
 ENV="develop"
@@ -21,84 +23,56 @@ LOG_DIR="./log"
 DEBUG=false
 ```
 
-## Config Your APIs
 
-#### API config sample
+# Database SQL
 
-> ./config/service/tenapi.json
-```json
-{
-    "service_map" : {
-        "default" : {
-            "host" : "https://tenapi.cn"
-        }
-    },
-    "data_key" : "",
-    "api_list" : [
-        {
-            "name" : "v2_yiyan",
-            "path" : "v2/yiyan",
-            "method" : "GET",
-            "content_type": ""
-        }
-    ]
-}
-```
+## SQLite
 
-## Add your routers
+```sql
+CREATE TABLE service(
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   name TEXT NOT NULL,
+   service TEXT NOT NULL,
+   host TEXT NOT NULL,
+   env TEXT NOT NULL,
+   timeout int,
+   sign TEXT NOT NULL,
+   sign_config TEXT NOT NULL,
+   disable_extract INTEGER NOT NULL,
+   code_key TEXT NOT NULL,
+   message_key TEXT NOT NULL,
+   data_key TEXT NOT NULL,
+   success_code TEXT NOT NULL,
+   description TEXT NOT NULL,
+   create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   modify_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-router config directory is `./config/router`, if you want add a router `your/path/mesh.json`,you can add the config.json file to the path like this:
-#### mesh
-> ./config/router/your/path/mesh.json
-```json
-{
-    "mode": "mesh",
-    "mesh_config": [
-        [
-            {
-                "api": "uomg/api_qq_info",
-                "params": {
-                    "qq": "@_input_.qq1"
-                },
-                "as": "qq1",
-                "error_exit": true
-            },
-            {
-                "api": "uomg/api_qq_info",
-                "params": {
-                    "qq": "@_input_.qq2"
-                },
-                "as": "qq2",
-                "error_exit": true
-            }
-        ]
-    ],
-    "response": {
-        "qq1" : "@_input_.qq1",
-        "data" : "@qq1"
-    }
-}
-```
+CREATE INDEX idx_service_env on service (service, env);
 
-#### relay
+CREATE TABLE service_api(
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   service TEXT NOT NULL,
+   api TEXT NOT NULL,
+   path TEXT NOT NULL,
+   method TEXT NOT NULL,
+   content_type TEXT NOT NULL,
+   timeout int,
+   description TEXT NOT NULL,
+   create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   modify_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) CREATE INDEX idx_service_api on service_api (service, api);
 
-```json
-{
-    "mode" : "relay",
-    "relay_api" : "tenapi/v2_yiyan",
-    "response" : {
-        "simple" : "@v2_yiyan"
-    }
-}
-```
-
-#### static
-
-```json
-{
-    "mode" : "static",
-    "response" : {
-        "simple" : "simple"
-    }
-}
+CREATE TABLE router (
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   path TEXT NOT NULL,
+   status INT NOT NULL,
+   classify TEXT NOT NULL,
+   mode TEXT NOT NULL,
+   request TEXT NOT NULL,
+   response TEXT NOT NULL,
+   description TEXT NOT NULL,
+   create_at INT,
+   modify_at INT
+);
 ```

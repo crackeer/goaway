@@ -16,6 +16,8 @@
     <script src="/assets/js/bootbox.min.js"></script>
     <script src="/assets/js/util.js"></script>
     <script src="/page/header.js"></script>
+    <script src="/assets/js/jsoneditor9.8.js"></script>
+    <link href="/assets/css/jsoneditor9.8.css" rel="stylesheet" />
 
 <body>
     <div id="header"></div>
@@ -45,19 +47,40 @@
             <div class="form-group">
                 <label for="description" class="control-label col-sm-2">签名算法</label>
                 <div class="col-sm-8">
-                    <p class="form-control-static">{{service.sign}}</p>
+                    <p class="form-control-static">{{service.sign || '无'}}</p>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" v-if="service.sign != undefine && service.sign.length > 0">
                 <label for="description" class="control-label col-sm-2">签名配置</label>
                 <div class="col-sm-8">
+                    <div id="jsoneditor" style="width: 100%; height: 220px"></div>
                     <textarea class="form-control" rows="3">{{service.sign_config}}</textarea>
                 </div>
             </div>
             <div class="form-group">
-                <label for="description" class="control-label col-sm-2">禁用提取结果</label>
+                <label for="description" class="control-label col-sm-2">禁用response提取</label>
                 <div class="col-sm-8">
-                    <p class="form-control-static">{{service.disable_extract > 0 ? '是' : '否'}}</p>
+                    <p class="form-control-static">{{service.disable_extract > 0 ? '不提取' : '提取'}}</p>
+                </div>
+            </div>
+
+            <div class="form-group" v-if="service.disable_extract != undefine && service.disable_extract < 1">
+                <label for="description" class="control-label col-sm-2">response提取配置</label>
+                <div class="col-sm-2">
+                    <p class="form-control-static">message_key</p>
+                    <p class="form-control-static">{{service.message_key}}</p>
+                </div>
+                <div class="col-sm-2">
+                    <p class="form-control-static">data_key</p>
+                    <p class="form-control-static">{{service.data_key}}</p>
+                </div>
+                <div class="col-sm-2">
+                    <p class="form-control-static">code_key</p>
+                    <p class="form-control-static">{{service.code_key}}</p>
+                </div>
+                <div class="col-sm-2">
+                    <p class="form-control-static">success_code</p>
+                    <p class="form-control-static">{{service.success_code}}</p>
                 </div>
             </div>
         </div>
@@ -171,6 +194,7 @@
     </template>
     <script>
         $(document).ready(function () {
+            window.jsonEditor = null;
             var vm = Vue.createApp({
                 data() {
                     let list = []
@@ -191,22 +215,28 @@
                     await this.getService()
                     await this.getServiceAPIList()
                 },
+
                 methods: {
-                    async next() {
-                        reloadWith({
-                            env: this.env,
-                            page: this.page + 1,
-                        })
-                    },
-                    async prev() {
-                        reloadWith({
-                            env: this.env,
-                            page: this.page - 1,
-                        })
+                    initJSONEditor(value) {
+                        if (window.jsonEditor == null) {
+                            setTimeout(() => {
+                                window.jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), {
+                                    "mode": "code",
+                                    "search": true,
+                                    "indentation": 4
+                                })
+                                try {
+                                    let jsonValue = JSON.parse(value)
+                                    window.jsonEditor.set(jsonValue)
+                                } catch (e) {
+                                }
+                            }, 300);
+                        }
                     },
                     async getService() {
                         let result = await axios.get('/query/service?id=' + getQuery('service_id', '0'))
                         this.service = result.data.data[0]
+                        this.initJSONEditor(this.service.sign_config)
                     },
                     async getServiceAPIList() {
                         let result = await axios.get('/query/service_api?service=' + this.service.service)

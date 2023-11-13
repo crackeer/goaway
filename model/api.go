@@ -35,7 +35,7 @@ type Service struct {
 	Service        string `json:"service"`
 	Sign           string `json:"sign"`
 	SignConfig     string `json:"sign_config"`
-	SuccessCodeKey string `json:"success_code_key"`
+	SuccessCode    string `json:"success_code"`
 	Timeout        int64  `json:"timeout"`
 }
 

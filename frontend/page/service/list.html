@@ -16,6 +16,8 @@
     <script src="/assets/js/bootbox.min.js"></script>
     <script src="/assets/js/util.js"></script>
     <script src="/page/header.js"></script>
+    <script src="/assets/js/jsoneditor9.8.js"></script>
+    <link href="/assets/css/jsoneditor9.8.css" rel="stylesheet" />
 
 <body>
     <div id="header"></div>
@@ -114,7 +116,7 @@
                             <div class="form-group">
                                 <label for="sign_config" class="control-label col-sm-2">签名配置</label>
                                 <div class="col-sm-10">
-                                    <textarea type="text" class="form-control" v-model="service.sign_config"></textarea>
+                                    <div id="jsoneditor" style="width: 100%; height: 220px"></div>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -141,9 +143,9 @@
                                     <span class="help-block">data_key</span>
                                 </div>
                                 <div class="col-sm-2">
-                                    <input type="text" class="form-control" v-model="service.success_code_key"
+                                    <input type="text" class="form-control" v-model="service.success_code"
                                         placeholder="成功code" />
-                                    <span class="help-block">success_code_key</span>
+                                    <span class="help-block">success_code</span>
                                 </div>
                                 <div class="col-sm-2">
                                     <input type="text" class="form-control" v-model="service.message_key"
@@ -195,7 +197,7 @@
     <script>
 
         $(document).ready(function () {
-            const PAGE_SIZE = 20
+            window.jsonEditor = null;
             var vm = Vue.createApp({
                 data() {
                     let list = []
@@ -208,7 +210,6 @@
                         service: {},
                         edit: false,
                         copyEnv: '',
-                        pageSize: PAGE_SIZE,
 
                         api: {},
                         signList: []
@@ -253,6 +254,23 @@
                         this.service = cloneObject(item)
                         this.edit = true
                         $('#myModal').modal()
+                        this.initJSONEditor(this.service.sign_config)
+                    },
+                    initJSONEditor(value) {
+                        if (window.jsonEditor == null) {
+                            setTimeout(() => {
+                                window.jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), {
+                                    "mode": "code",
+                                    "search": true,
+                                    "indentation": 4
+                                })
+                                try {
+                                    let jsonValue = JSON.parse(value)
+                                    window.jsonEditor.set(jsonValue)
+                                } catch (e) {
+                                }
+                            }, 300);
+                        }
                     },
                     async showCreateModel() {
                         this.service = {
@@ -262,14 +280,15 @@
                             'host': '',
                             'description': '',
                             'sign': '',
-                            'sign_config': '',
+                            'sign_config': '{}',
                             'timeout': 1000,
                             'disable_extract': '0',
                             'code_key': 'code',
                             'message_key': 'message',
                             'data_key': 'data',
-                            'success_code_key': '0'
+                            'success_code': '0'
                         }
+                        this.initJSONEditor()
                         this.edit = false
                         $('#myModal').modal()
                     },
@@ -280,12 +299,12 @@
                                 'host': this.service.host,
                                 'description': this.service.description,
                                 'sign': this.service.sign,
-                                'sign_config': this.service.sign_config,
+                                'sign_config': JSON.stringify(window.jsonEditor.get()),
                                 'timeout': this.service.timeout,
                                 'data_key': this.service.data_key,
                                 'code_key': this.service.code_key,
                                 'message_key': this.service.message_key,
-                                'success_code_key': this.service.success_code_key,
+                                'success_code': this.service.success_code,
                                 'disable_extract': this.service.disable_extract,
                             }
 
@@ -302,13 +321,13 @@
                                 'host': this.service.host,
                                 'description': this.service.description,
                                 'sign': this.service.sign,
-                                'sign_config': this.service.sign_config,
+                                'sign_config': JSON.stringify(window.jsonEditor.get()),
                                 'timeout': this.service.timeout,
                                 'env': 'default',
                                 'data_key': this.service.data_key,
                                 'code_key': this.service.code_key,
                                 'message_key': this.service.message_key,
-                                'success_code_key': this.service.success_code_key,
+                                'success_code': this.service.success_code,
                                 'disable_extract': parseInt(this.service.disable_extract),
                             }
 
@@ -352,7 +371,7 @@
                             'data_key': this.service.data_key,
                             'code_key': this.service.code_key,
                             'message_key': this.service.message_key,
-                            'success_code_key': this.service.success_code_key,
+                            'success_code': this.service.success_code,
                             'disable_extract': this.service.disable_extract,
                         }
 
