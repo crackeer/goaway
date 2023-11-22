@@ -13,9 +13,57 @@
     <div id="app"></div>
     <template id="template">
         <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>Github地址</h3>
+            </div>
             <div class="panel-body">
-                <h1>github：<a href="https://github.com/crackeer/goaway"
-                        target="_blank">https://github.com/crackeer/goaway</a></h1>
+                <div style="font-size: 17px;"><a href="https://github.com/crackeer/goaway"
+                        target="_blank">https://github.com/crackeer/goaway</a></div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>签名算法</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>唯一标识</th>
+                            <th>GoPkgPath</th>
+                            <th>名字</th>
+                            <th style="text-align: center;">描述+配置</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, i) in signList">
+                            <td>{{item.sign_id}}</td>
+                            <td>{{item.go_pkg_path}}</td>
+                            <td>{{item.name}}</td>
+                            <td style="text-align: center;">
+                                <a href="javascript:;" @click="showConfig(item)">查看</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="modal fade" tabindex="-1" role="dialog" id="myModal">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">查看`{{signID}}`签名配置+介绍</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p style="font-size: 18px;" class="bold">配置参数模板</p>
+                        <div id="jsoneditor" style="width: 100%; height: 220px"></div>
+                        <p style="font-size: 18px; margin-top: 20px;" class="bold">签名介绍</p>
+                        <div id="markdown"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </template>
@@ -25,10 +73,32 @@
         var vm = Vue.createApp({
             data() {
                 return {
-                    
+                    signList: [],
+                    signID: '',
+                    signConfig: {},
+                    signIntroduction: ""
                 }
             },
             template: '#template',
+            async mounted() {
+                this.getSignList()
+            },
+            methods: {
+                async getSignList() {
+                    let result = await axios.get('/sign/list')
+                    this.signList = result.data.data
+                },
+                async showConfig(item) {
+                    this.signID = item.sign_id
+                    $('#myModal').modal('show');
+                    //$("#markdown").text(item.introduction)
+                    setTimeout(() => {
+                        initByteMarkdownPreview("markdown", item.introduction)
+                        initJSONEditor("jsoneditor", JSON.stringify(item.config_template))
+                    }, 200)
+
+                }
+            }
         })
         vm.mount('#app')
     }

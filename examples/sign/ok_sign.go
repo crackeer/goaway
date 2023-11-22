@@ -16,7 +16,7 @@ func (OkSign) ID() string {
 }
 
 func (OkSign) Introduction() string {
-	return "ok sign introduction"
+	return "## ok sign introduction"
 }
 
 func (OkSign) SignConfigTemplate() map[string]interface{} {

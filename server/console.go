@@ -164,7 +164,8 @@ func getSignList(ctx *gin.Context) {
 			"sign_id":         v.ID(),
 			"introduction":    v.Introduction(),
 			"config_template": v.SignConfigTemplate(),
-			"from":            reflect.TypeOf(v).PkgPath() + "#" + reflect.TypeOf(v).Name(),
+			"go_pkg_path":     reflect.TypeOf(v).PkgPath(),
+			"name":            reflect.TypeOf(v).Name(),
 		})
 	}
 	ginHelper.Success(ctx, retData)

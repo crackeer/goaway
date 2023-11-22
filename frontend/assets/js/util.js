@@ -129,5 +129,37 @@ function readFiles(file) {
         }
         reader.readAsDataURL(file);
     }
-    
+}
+
+function initByteMarkdownPreview(target, value) {
+    let markdown = 'markdown-preview-' + target
+    if (window[markdown] != undefined) {
+        $("#" + target).html('')
+    }
+    window[markdown] = new bytemd.Viewer({
+        target: document.getElementById(target),
+        props: {
+            value: value,
+            plugins: [
+                bytemdPluginGfm(), bytemdPluginHighlight()
+            ]
+        },
+    });
+}
+
+function initJSONEditor(target, value) {
+    let jsonEditor = 'jsonEditor-' + target
+    if (window[jsonEditor] == undefined) {
+        window[jsonEditor] = new JSONEditor(document.getElementById("jsoneditor"), {
+            "mode": "code",
+            "search": true,
+            "indentation": 4
+        })
+    }
+    try {
+        let jsonValue = JSON.parse(value)
+        
+        window[jsonEditor].set(jsonValue)
+    } catch (e) {
+    }
 }
