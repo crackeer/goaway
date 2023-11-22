@@ -7,28 +7,10 @@
     <meta name="description" content="Description">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title>路由详情</title>
-    <link rel="stylesheet" href="/assets/bytemd/bytemd.css" />
-    <link rel="stylesheet" href="/assets/bytemd/github-markdown.css" />
-    <link rel="stylesheet" href="/assets/bytemd/highlight.css" />
-    <script src="/assets/bytemd/bytemd.umd.js"></script>
-    <script src="/assets/bytemd/bytemd-plugin-gfm.js"></script>
-    <script src="/assets/bytemd/plugin-highlight.js"></script>
-    <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
-    <link rel="stylesheet" href="/assets/css/my.css" />
-    <script src="/assets/js/jquery.js"></script>
-    <script src="/assets/js/bootstrap.min.js"></script>
-    <script src="/assets/js/vue.global.js"></script>
-    <script src="/assets/js/axios.min.js"></script>
-    <script src="/assets/js/bootbox.min.js"></script>
-    <script src="/assets/js/util.js"></script>
-    <script src="/page/header.js"></script>
-    <script src="/assets/js/jsoneditor9.8.js"></script>
-    <link href="/assets/css/jsoneditor9.8.css" rel="stylesheet" />
+    <script src="/header.js"></script>
 
 
 <body>
-    <div id="header"></div>
-
     <div id="app"></div>
     <template id="template">
         <h2>路由详情：<small>{{router.path}}</small></h2>
@@ -86,7 +68,7 @@
 
     </template>
     <script>
-        $(document).ready(function () {
+        var startWork = function () {
             window.jsonEditor = null;
             window.jsonEditor1 = null;
             window.jsonEditor2 = null;
@@ -194,7 +176,7 @@
 
             })
             vm.mount('#app')
-        })
+        }
     </script>
 </body>
 

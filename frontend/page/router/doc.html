@@ -5,27 +5,10 @@
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>文档编辑</title>
-    <link rel="stylesheet" href="/assets/bytemd/bytemd.css" />
-    <link rel="stylesheet" href="/assets/bytemd/github-markdown.css" />
-    <link rel="stylesheet" href="/assets/bytemd/highlight.css" />
-    <script src="/assets/bytemd/bytemd.umd.js"></script>
-    <script src="/assets/bytemd/bytemd-plugin-gfm.js"></script>
-    <script src="/assets/bytemd/plugin-highlight.js"></script>
-
-    <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
-    <link rel="stylesheet" href="/assets/css/my.css" />
-    <script src="/assets/js/jquery.js"></script>
-    <script src="/assets/js/bootstrap.min.js"></script>
-    <script src="/assets/js/vue.global.js"></script>
-    <script src="/assets/js/axios.min.js"></script>
-    <script src="/assets/js/bootbox.min.js"></script>
-    <script src="/assets/js/util.js"></script>
-    <script src="/assets/js/dayjs.min.js"></script>
-    <script src="/page/header.js"></script>
+    <script src="/header.js"></script>
 </head>
 
 <body>
-    <div id="header"></div>
     <div id="app"></div>
     <template id="template">
         <div class="row">
@@ -40,7 +23,7 @@
         </div>
     </template>
     <script>
-        $(document).ready(function () {
+        var startWork = function () {
             var vm = Vue.createApp({
                 data() {
                     return {
@@ -99,8 +82,7 @@
                 }
             })
             vm.mount('#app')
-        })
-
+        }
     </script>
 </body>
 <style>

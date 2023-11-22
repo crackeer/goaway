@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -45,18 +46,7 @@ func RunConsole() error {
 	router.GET("/router/category", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
 		ginHelper.Success(ctx, container.GetAppConfig().RouterCategory)
 	})
-	router.GET("/sign/list", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
-		list := apiBase.GetSignHandleMap()
-		retData := []map[string]interface{}{}
-		for _, v := range list {
-			retData = append(retData, map[string]interface{}{
-				"sign":                 v.ID(),
-				"introduction":         v.Introduction(),
-				"sign_config_template": v.SignConfigTemplate(),
-			})
-		}
-		ginHelper.Success(ctx, retData)
-	})
+	router.GET("/sign/list", ginHelper.DoResponseJSON(), getSignList)
 	router.NoRoute(createStaticHandler(http.Dir(cfg.StaticDir)))
 	return router.Run(fmt.Sprintf(":%d", cfg.ConsolePort))
 }
@@ -164,4 +154,18 @@ func queryData(ctx *gin.Context) {
 
 	db.Table(getTable(ctx)).Where(query).Order("id desc").Find(&list)
 	ginHelper.Success(ctx, list)
+}
+
+func getSignList(ctx *gin.Context) {
+	list := apiBase.GetSignHandleMap()
+	retData := []map[string]interface{}{}
+	for _, v := range list {
+		retData = append(retData, map[string]interface{}{
+			"sign_id":         v.ID(),
+			"introduction":    v.Introduction(),
+			"config_template": v.SignConfigTemplate(),
+			"from":            reflect.TypeOf(v).PkgPath() + "#" + reflect.TypeOf(v).Name(),
+		})
+	}
+	ginHelper.Success(ctx, retData)
 }

@@ -13,11 +13,6 @@ body {
     margin-left: 5px;
 }
 
-.pic-list img {
-    display: block;
-    border: 1px solid gray;
-    margin: 5px auto;
-}
 
 .progress strong {
     font-size: 16px;

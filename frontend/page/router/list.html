@@ -1,27 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="description" content="Description">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title>路由</title>
-    <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
-    <link rel="stylesheet" href="/assets/css/my.css" />
-    <script src="/assets/js/jquery.js"></script>
-    <script src="/assets/js/bootstrap.min.js"></script>
-    <script src="/assets/js/vue.global.js"></script>
-    <script src="/assets/js/axios.min.js"></script>
-    <script src="/assets/js/bootbox.min.js"></script>
-    <script src="/assets/js/util.js"></script>
-    <script src="/page/header.js"></script>
-    <script src="/assets/js/jsoneditor9.8.js"></script>
-    <link href="/assets/css/jsoneditor9.8.css" rel="stylesheet" />
-
-
+    <script src="/header.js"></script>
 <body>
-    <div id="header"></div>
     <div id="app"></div>
     <template id="template">
         <div style="padding: 1px 0 10px;">
@@ -67,7 +53,7 @@
     </template>
     <script>
 
-        $(document).ready(function () {
+        var startWork = function () {
             window.jsonEditor = null;
             var vm = Vue.createApp({
                 data() {
@@ -140,7 +126,7 @@
 
             })
             vm.mount('#app')
-        })
+        }
     </script>
 </body>
 

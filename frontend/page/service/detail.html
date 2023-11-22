@@ -7,20 +7,9 @@
     <meta name="description" content="Description">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title>服务</title>
-    <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
-    <link rel="stylesheet" href="/assets/css/my.css" />
-    <script src="/assets/js/jquery.js"></script>
-    <script src="/assets/js/bootstrap.min.js"></script>
-    <script src="/assets/js/vue.global.js"></script>
-    <script src="/assets/js/axios.min.js"></script>
-    <script src="/assets/js/bootbox.min.js"></script>
-    <script src="/assets/js/util.js"></script>
-    <script src="/page/header.js"></script>
-    <script src="/assets/js/jsoneditor9.8.js"></script>
-    <link href="/assets/css/jsoneditor9.8.css" rel="stylesheet" />
+    <script src="/header.js"></script>
 
 <body>
-    <div id="header"></div>
     <div id="app"></div>
     <template id="template">
         <h2>服务详情：<small>{{service.host}}（环境：{{service.env}}）</small></h2>
@@ -191,149 +180,135 @@
 
 
     </template>
-    <script>
-        $(document).ready(function () {
-            window.jsonEditor = null;
-            var vm = Vue.createApp({
-                data() {
-                    let list = []
-                    return {
-                        service: {},
-                        apiList: [],
-                        page: 1,
+
+</body>
+<script>
+    var startWork = function () {
+        window.jsonEditor = null;
+        var vm = Vue.createApp({
+            data() {
+                let list = []
+                return {
+                    service: {},
+                    apiList: [],
+                    page: 1,
 
 
-                        edit: false,
-                        copyEnv: '',
-                        api: {},
+                    edit: false,
+                    copyEnv: '',
+                    api: {},
+                }
+            },
+            template: '#template',
+            async mounted() {
+                this.page = parseInt(getQuery('page', '1'))
+                await this.getService()
+                await this.getServiceAPIList()
+            },
+
+            methods: {
+                initJSONEditor(value) {
+                    if (window.jsonEditor == null) {
+                        setTimeout(() => {
+                            window.jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), {
+                                "mode": "code",
+                                "search": true,
+                                "indentation": 4
+                            })
+                            try {
+                                let jsonValue = JSON.parse(value)
+                                window.jsonEditor.set(jsonValue)
+                            } catch (e) {
+                            }
+                        }, 300);
                     }
                 },
-                template: '#template',
-                async mounted() {
-                    this.page = parseInt(getQuery('page', '1'))
-                    await this.getService()
-                    await this.getServiceAPIList()
+                async getService() {
+                    let result = await axios.get('/query/service?id=' + getQuery('service_id', '0'))
+                    this.service = result.data.data[0]
+                    this.initJSONEditor(this.service.sign_config)
                 },
+                async getServiceAPIList() {
+                    let result = await axios.get('/query/service_api?service=' + this.service.service)
+                    this.apiList = result.data.data
+                },
+                async showCopyModal(item) {
+                    this.service = item
+                    $('#copyModal').modal()
+                },
+                async doCopyService() {
+                    let insertData = {
+                        'name': this.service.name,
+                        'service': this.service.service,
+                        'host': this.service.host,
+                        'description': this.service.description,
+                        'sign': this.service.sign,
+                        'sign_config': this.service.sign_config,
+                        'timeout': this.service.timeout,
+                        'env': this.copyEnv,
+                        'data_key': this.service.data_key,
+                        'code_key': this.service.code_key,
+                        'message_key': this.service.message_key,
+                        'success_code_key': this.service.success_code_key,
+                        'disable_extract': this.service.disable_extract,
+                    }
 
-                methods: {
-                    initJSONEditor(value) {
-                        if (window.jsonEditor == null) {
-                            setTimeout(() => {
-                                window.jsonEditor = new JSONEditor(document.getElementById("jsoneditor"), {
-                                    "mode": "code",
-                                    "search": true,
-                                    "indentation": 4
-                                })
-                                try {
-                                    let jsonValue = JSON.parse(value)
-                                    window.jsonEditor.set(jsonValue)
-                                } catch (e) {
-                                }
-                            }, 300);
-                        }
-                    },
-                    async getService() {
-                        let result = await axios.get('/query/service?id=' + getQuery('service_id', '0'))
-                        this.service = result.data.data[0]
-                        this.initJSONEditor(this.service.sign_config)
-                    },
-                    async getServiceAPIList() {
-                        let result = await axios.get('/query/service_api?service=' + this.service.service)
-                        this.apiList = result.data.data
-                    },
-                    async showCopyModal(item) {
-                        this.service = item
-                        $('#copyModal').modal()
-                    },
-                    async doCopyService() {
-                        let insertData = {
-                            'name': this.service.name,
-                            'service': this.service.service,
-                            'host': this.service.host,
-                            'description': this.service.description,
-                            'sign': this.service.sign,
-                            'sign_config': this.service.sign_config,
-                            'timeout': this.service.timeout,
-                            'env': this.copyEnv,
-                            'data_key': this.service.data_key,
-                            'code_key': this.service.code_key,
-                            'message_key': this.service.message_key,
-                            'success_code_key': this.service.success_code_key,
-                            'disable_extract': this.service.disable_extract,
+                    let result = await axios.post('/create/service', insertData)
+                    if (result.data.code < 0) {
+                        alert(result.data.message)
+                    } else {
+                        reloadWith({
+                            env: this.copyEnv,
+                            page: 1
+                        })
+                    }
+                },
+                async showCreateApiModal() {
+                    this.edit = false
+                    this.api = {
+                        api: '',
+                        path: '',
+                        method: 'GET',
+                        content_type: 'none',
+                        timeout: 4000,
+                        description: ''
+                    }
+                    $('#myApiModal').modal();
+                },
+                async showEditApiModal(item) {
+                    this.api = cloneObject(item)
+                    this.edit = true
+                    $('#myApiModal').modal()
+                },
+                async doUpdateServiceAPI() {
+                    if (this.edit) {
+                        let updateData = {
+                            'api': this.api.api,
+                            'path': this.api.path,
+                            'description': this.api.description,
+                            'method': this.api.method,
+                            'timeout': this.api.timeout,
+                            'content_type': this.api.content_type,
                         }
 
-                        let result = await axios.post('/create/service', insertData)
+                        let result = await axios.post('/modify/service_api/' + this.api.id, updateData)
                         if (result.data.code < 0) {
                             alert(result.data.message)
                         } else {
-                            reloadWith({
-                                env: this.copyEnv,
-                                page: 1
-                            })
+                            simpleReload()
                         }
-                    },
-                    async showCreateApiModal() {
-                        this.edit = false
-                        this.api = {
-                            api: '',
-                            path: '',
-                            method: 'GET',
-                            content_type: 'none',
-                            timeout: 4000,
-                            description: ''
+                    } else {
+                        let insertData = {
+                            'service': this.service.service,
+                            'api': this.api.api,
+                            'path': this.api.path,
+                            'description': this.api.description,
+                            'method': this.api.method,
+                            'timeout': this.api.timeout,
+                            'content_type': this.api.content_type,
                         }
-                        $('#myApiModal').modal();
-                    },
-                    async showEditApiModal(item) {
-                        this.api = cloneObject(item)
-                        this.edit = true
-                        $('#myApiModal').modal()
-                    },
-                    async doUpdateServiceAPI() {
-                        if (this.edit) {
-                            let updateData = {
-                                'api': this.api.api,
-                                'path': this.api.path,
-                                'description': this.api.description,
-                                'method': this.api.method,
-                                'timeout': this.api.timeout,
-                                'content_type': this.api.content_type,
-                            }
 
-                            let result = await axios.post('/modify/service_api/' + this.api.id, updateData)
-                            if (result.data.code < 0) {
-                                alert(result.data.message)
-                            } else {
-                                simpleReload()
-                            }
-                        } else {
-                            let insertData = {
-                                'service': this.service.service,
-                                'api': this.api.api,
-                                'path': this.api.path,
-                                'description': this.api.description,
-                                'method': this.api.method,
-                                'timeout': this.api.timeout,
-                                'content_type': this.api.content_type,
-                            }
-
-                            let result = await axios.post('/create/service_api', insertData)
-                            if (result.data.code < 0) {
-                                alert(result.data.message)
-                            } else {
-                                simpleReload()
-                            }
-                        }
-                    },
-                    async showDeleteApiModal(item) {
-                        bootbox.confirm("确认删除`" + item.path + "`？", (result) => {
-                            if (result) {
-                                this.doDeleteServiceApi(item.id)
-                            }
-                        })
-                    },
-                    async doDeleteServiceApi(id) {
-                        let result = await axios.post('/delete/service_api/' + id)
+                        let result = await axios.post('/create/service_api', insertData)
                         if (result.data.code < 0) {
                             alert(result.data.message)
                         } else {
@@ -341,11 +316,26 @@
                         }
                     }
                 },
+                async showDeleteApiModal(item) {
+                    bootbox.confirm("确认删除`" + item.path + "`？", (result) => {
+                        if (result) {
+                            this.doDeleteServiceApi(item.id)
+                        }
+                    })
+                },
+                async doDeleteServiceApi(id) {
+                    let result = await axios.post('/delete/service_api/' + id)
+                    if (result.data.code < 0) {
+                        alert(result.data.message)
+                    } else {
+                        simpleReload()
+                    }
+                }
+            },
 
-            })
-            vm.mount('#app')
         })
-    </script>
-</body>
+        vm.mount('#app')
+    }
+</script>
 
 </html>
