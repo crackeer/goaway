@@ -35,6 +35,7 @@ func InitModel() {
 		modelDB = db
 	}
 }
+
 func open(connection string) (*gorm.DB, error) {
 	if strings.HasPrefix(connection, "mysql://") {
 		return gorm.Open(mysql.Open(connection[8:]), &gorm.Config{})

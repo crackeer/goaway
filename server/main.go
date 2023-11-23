@@ -55,7 +55,15 @@ func Run(ctx context.Context, port int64) error {
 	router.RedirectFixedPath = false
 	router.RedirectTrailingSlash = false
 
+	for path, apiFunc := range container.GetNakedRouters() {
+		router.Any(path, apiFunc)
+	}
+
 	router.Use(giner.DoResponseJSON())
+	router.Use(container.GetMiddlewares()...)
+	for path, apiFunc := range container.GetRouters() {
+		router.Any(path, apiFunc)
+	}
 	router.Any("proxy/*api", handler.Proxy)
 	router.NoRoute(handler.Handle)
 	return router.Run(fmt.Sprintf(":%d", port))
