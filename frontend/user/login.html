@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="Description">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>登录</title>
+    <script src="/header.js"></script>
+
+<body>
+    <div id="app"></div>
+    <template id="template">
+        <div class="row" style="padding-top: 15%; ">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="login-panel panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">登录</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form role="form" method="POST" action="/user/login">
+                            <fieldset>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="用户名" name="username" type="text" autofocus
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="密码" name="password" type="password"
+                                        required>
+                                </div>
+                                <!-- 检查复选框 -->
+                                <div class="checkbox">
+                                    <label>
+                                        <input name="remember" type="checkbox" value="Remember Me">记住我
+                                    </label>
+                                </div>
+                                <!-- 登录按钮 -->
+                                <button type="submit" class="btn btn-lg btn-success btn-block">登录</button>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</body>
+<script>
+    var startWork = function () {
+        var vm = Vue.createApp({
+            data() {
+                return {
+                    signList: [],
+                    signID: '',
+                    signConfig: {},
+                    signIntroduction: ""
+                }
+            },
+            template: '#template',
+            async mounted() {
+                this.getSignList()
+            },
+            methods: {
+                async getSignList() {
+                    let result = await axios.get('/sign/list')
+                    this.signList = result.data.data
+                },
+                async showConfig(item) {
+                    this.signID = item.sign_id
+                    $('#myModal').modal('show');
+                    //$("#markdown").text(item.introduction)
+                    setTimeout(() => {
+                        initByteMarkdownPreview("markdown", item.introduction)
+                        initJSONEditor("jsoneditor", JSON.stringify(item.config_template))
+                    }, 200)
+
+                }
+            }
+        })
+        vm.mount('#app')
+    }
+</script>
+
+</html>

@@ -14,8 +14,8 @@ var header = `
         </div>
         <div class="collapse navbar-collapse" id="navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li><a href="/page/router/list.html">路由</a></li>
-                <li><a href="/page/service/list.html">服务</a></li>
+                <li><a href="/router/list.html">路由</a></li>
+                <li><a href="/service/list.html">服务</a></li>
             </ul>
         </div>
     </div>
@@ -56,6 +56,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 }, false);
 
 function loadNavigation() {
+    if(window.location.href.indexOf('/user/login.html') !== -1) {
+        return
+    }
     $('body').prepend(header)
     let parts = window.location.pathname.split('/')
     console.log(parts[1])

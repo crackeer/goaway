@@ -36,7 +36,7 @@
                 <tr v-for="(item, i) in this.routerList">
                     <td>{{item.id}}</td>
                     <td>
-                        <a :href="'/page/router/detail.html?router_id=' + item.id" target="_blank">
+                        <a :href="'/router/detail.html?router_id=' + item.id" target="_blank">
                             {{item.path}}
                         </a>
                     </td>
@@ -111,17 +111,17 @@
                         }
                     },
                     async gotoEdit(item) {
-                        window.location.href = "/page/router/modify.html?router_id=" + item.id
+                        window.location.href = "/router/modify.html?router_id=" + item.id
                     },
                     async gotoCreate(item) {
-                        let url = "/page/router/create.html"
+                        let url = "/router/create.html"
                         if(this.category != 'all') {
                             url += "?category=" + this.category
                         }
                         window.location.href = url
                     },
                     async gotoDoc(item) {
-                        window.location.href = "/page/router/doc.html?router_id=" + item.id
+                        window.location.href = "/router/doc.html?router_id=" + item.id
                     },
                 },
 
