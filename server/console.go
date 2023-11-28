@@ -36,6 +36,7 @@ func RunConsole() error {
 	router := gin.New()
 	router.RedirectFixedPath = false
 	router.RedirectTrailingSlash = false
+	router.POST("/user/login", userLogin)
 	router.POST("/delete/:table/:id", ginHelper.DoResponseJSON(), deleteData)
 	router.POST("/create/:table", ginHelper.DoResponseJSON(), createData)
 	router.POST("/modify/:table/:id", ginHelper.DoResponseJSON(), modifyData)
@@ -169,4 +170,21 @@ func getSignList(ctx *gin.Context) {
 		})
 	}
 	ginHelper.Success(ctx, retData)
+}
+
+func userLogin(ctx *gin.Context) {
+	var (
+		username string = ctx.PostForm("username")
+		password string = ctx.PostForm("password")
+	)
+	user := &model.User{}
+	db := container.GetModelDB()
+	db.Model(&model.User{}).Where(map[string]interface{}{
+		"username": username,
+	}).First(user)
+	if user.ID < 1 {
+		return
+	}
+
+	ctx.String(http.StatusOK, "username=%s|password=%s", username, password)
 }
