@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/crackeer/goaway/container"
+	"github.com/crackeer/goaway/model"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -12,12 +13,17 @@ import (
 //	@param user
 //	@return string
 //	@return error
-func generateJwt(user map[string]interface{}) (map[string]interface{}, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims(user))
+func generateJwt(user model.User) (map[string]interface{}, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims(user.Map()))
 	return token.SignedString([]byte(container.GetAppConfig().LoginSalt))
 }
 
-func parseJwt(token string) (map[string]interface{}, error) {
+// parseJwt
+//
+//	@param token
+//	@return map[string]interface{}
+//	@return error
+func parseJwt(token string) (model.User, error) {
 	object, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -26,7 +32,8 @@ func parseJwt(token string) (map[string]interface{}, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return model.User{}, err
 	}
-	return object.Claims.(jwt.MapClaims), nil
+	user := object.Claims.(jwt.MapClaims)
+	return model.Map2User(user), nil
 }
