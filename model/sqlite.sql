@@ -44,3 +44,10 @@ CREATE TABLE router (
    create_at INT,
    modify_at INT
 );
+
+CREATE TABLE user(
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   username TEXT NOT NULL,
+   password_md5 TEXT NOT NULL,
+   user_type TEXT NOT NULL
+)

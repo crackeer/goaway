@@ -16,6 +16,7 @@ type AppConfig struct {
 	LogDir         string   `env:"LOG_DIR"`
 	SyncInterval   int64    `env:"SYNC_INTERVAL"`
 	Debug          bool     `env:"DEBUG"`
+	LoginSalt      string   `env:"LOG_SALT"`
 }
 
 var (

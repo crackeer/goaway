@@ -36,7 +36,7 @@ func RunConsole() error {
 	router := gin.New()
 	router.RedirectFixedPath = false
 	router.RedirectTrailingSlash = false
-	router.POST("/user/login", userLogin)
+	router.POST("/user/login", ginHelper.DoResponseJSON(), userLogin)
 	router.POST("/delete/:table/:id", ginHelper.DoResponseJSON(), deleteData)
 	router.POST("/create/:table", ginHelper.DoResponseJSON(), createData)
 	router.POST("/modify/:table/:id", ginHelper.DoResponseJSON(), modifyData)
@@ -183,6 +183,7 @@ func userLogin(ctx *gin.Context) {
 		"username": username,
 	}).First(user)
 	if user.ID < 1 {
+		ginHelper.Failure(ctx, -1, "user not found")
 		return
 	}
 
