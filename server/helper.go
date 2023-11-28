@@ -13,7 +13,7 @@ import (
 //	@param user
 //	@return string
 //	@return error
-func generateJwt(user model.User) (map[string]interface{}, error) {
+func generateJwt(user model.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims(user.Map()))
 	return token.SignedString([]byte(container.GetAppConfig().LoginSalt))
 }
