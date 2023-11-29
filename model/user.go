@@ -1,7 +1,5 @@
 package model
 
-import "encoding/json"
-
 // User
 type User struct {
 	ID          int64  `json:"id"`
@@ -24,14 +22,4 @@ func (user User) Map() map[string]interface{} {
 		"password_md5": user.PasswordMD5,
 		"user_type":    user.UserType,
 	}
-}
-
-// Map2User
-//  @param tmp
-//  @return User
-func Map2User(tmp map[string]interface{}) User {
-	bytes, _ := json.Marshal(tmp)
-	user := User{}
-	json.Unmarshal(bytes, &user)
-	return user
 }

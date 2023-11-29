@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/crackeer/goaway/container"
 	"github.com/crackeer/goaway/model"
@@ -13,6 +14,10 @@ import (
 	apiBase "github.com/crackeer/simple_http"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
+)
+
+var (
+	tokenKey string = "token"
 )
 
 func createStaticHandler(fs http.FileSystem) gin.HandlerFunc {
@@ -37,17 +42,22 @@ func RunConsole() error {
 	router.RedirectFixedPath = false
 	router.RedirectTrailingSlash = false
 	router.POST("/user/login", ginHelper.DoResponseJSON(), userLogin)
-	router.POST("/delete/:table/:id", ginHelper.DoResponseJSON(), deleteData)
-	router.POST("/create/:table", ginHelper.DoResponseJSON(), createData)
-	router.POST("/modify/:table/:id", ginHelper.DoResponseJSON(), modifyData)
-	router.GET("/query/:table", ginHelper.DoResponseJSON(), queryData)
-	router.GET("/env/list", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
+	wrapperRouter := router.Group("", checkAPILogin, ginHelper.DoResponseJSON())
+	wrapperRouter.GET("/user/info", func(ctx *gin.Context) {
+		ginHelper.Success(ctx, getCurrentUser(ctx))
+	})
+	wrapperRouter.POST("/delete/:table/:id", deleteData)
+	wrapperRouter.POST("/create/:table", createData)
+	wrapperRouter.POST("/modify/:table/:id", modifyData)
+	wrapperRouter.GET("/query/:table", queryData)
+	wrapperRouter.GET("/env/list", func(ctx *gin.Context) {
 		ginHelper.Success(ctx, container.GetAppConfig().EnvList)
 	})
-	router.GET("/router/category", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
+	wrapperRouter.GET("/router/category", func(ctx *gin.Context) {
 		ginHelper.Success(ctx, container.GetAppConfig().RouterCategory)
 	})
-	router.GET("/sign/list", ginHelper.DoResponseJSON(), getSignList)
+	wrapperRouter.GET("/sign/list", getSignList)
+	router.Use(checkLogin)
 	router.NoRoute(createStaticHandler(http.Dir(cfg.StaticDir)))
 	return router.Run(fmt.Sprintf(":%d", cfg.ConsolePort))
 }
@@ -172,20 +182,43 @@ func getSignList(ctx *gin.Context) {
 	ginHelper.Success(ctx, retData)
 }
 
+type LoginForm struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 func userLogin(ctx *gin.Context) {
-	var (
-		username string = ctx.PostForm("username")
-		password string = ctx.PostForm("password")
-	)
+	loginForm := &LoginForm{}
+	if err := ctx.ShouldBindJSON(loginForm); err != nil {
+		ginHelper.Failure(ctx, -1, err.Error())
+		return
+	}
 	user := &model.User{}
 	db := container.GetModelDB()
 	db.Model(&model.User{}).Where(map[string]interface{}{
-		"username": username,
+		"username": loginForm.Username,
 	}).First(user)
 	if user.ID < 1 {
 		ginHelper.Failure(ctx, -1, "user not found")
 		return
 	}
 
-	ctx.String(http.StatusOK, "username=%s|password=%s", username, password)
+	if !strings.EqualFold(calcMD5(loginForm.Password), user.PasswordMD5) {
+		ginHelper.Failure(ctx, -1, "password wrong")
+		return
+	}
+
+	expireAt := time.Now().Add(30 * 24 * time.Hour).Unix()
+
+	token, err := generateJwt(user, expireAt)
+	if err != nil {
+		ginHelper.Failure(ctx, -1, "generate token error:"+err.Error())
+		return
+	}
+	domain := ctx.Request.Host
+	ctx.SetCookie(tokenKey, token, 3600*24*365, "/", domain, true, false)
+	ginHelper.Success(ctx, map[string]interface{}{
+		"token":  token,
+		"domain": domain,
+	})
 }
