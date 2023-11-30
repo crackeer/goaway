@@ -17,6 +17,15 @@ var header = `
                 <li><a href="/router/list.html">路由</a></li>
                 <li><a href="/service/list.html">服务</a></li>
             </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">日志</a></li>
+                <li class="dropdown">
+                    <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="username">暂无<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/user/logout">退出</a></li>
+                    </ul>
+              </li>
+            </ul>
         </div>
     </div>
 </nav>
@@ -45,24 +54,42 @@ var jsFile2 = [
     "/assets/bytemd/bytemd-plugin-gfm.js",
     "/assets/bytemd/plugin-highlight.js",
 ]
+var userTypeMapping = {
+    "root" : "超级管理员",
+    "normal" : "普通用户",
+    "read" : "只读用户"
+}
 document.addEventListener("DOMContentLoaded", async () => {
     loadStyles(styleFiles)
     await loadJs(jsFile1)
-    loadNavigation()
     await loadJs(jsFile2)
-    await sleep(200)
+    await loadNavigation()
+    await getLoginUser()
+    await sleep(100)
     startWork()
-
 }, false);
 
-function loadNavigation() {
-    if(window.location.href.indexOf('/user/login.html') !== -1) {
+async function loadNavigation() {
+    if (window.location.href.indexOf('/user/login.html') !== -1) {
         return
     }
     $('body').prepend(header)
     let parts = window.location.pathname.split('/')
     console.log(parts[1])
     $('a[id="' + parts[1] + '-a"]').parent().addClass('active')
+}
+
+async function getLoginUser() {
+    let result = await axios.get('/user/info')
+    if (result.data.code === 0) {
+        window.USER = result.data.data
+        let userTypeName = userTypeMapping[window.USER.user_type]
+        $('#username').html(userTypeName + '：' + window.USER.username + '<span class="caret"></span>')
+    }
+}
+
+function showUser() {
+    alert(88)
 }
 
 
