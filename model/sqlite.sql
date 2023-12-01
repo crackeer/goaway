@@ -49,5 +49,17 @@ CREATE TABLE user(
    id INTEGER PRIMARY KEY AUTOINCREMENT,
    username TEXT NOT NULL,
    password_md5 TEXT NOT NULL,
-   user_type TEXT NOT NULL
+   user_type TEXT NOT NULL,
+   create_at INT,
+   modify_at INT
+)
+
+CREATE TABLE log(
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   table TEXT NOT NULL,
+   action TEXT NOT NULL,
+   data_id TEXT NOT NULL,
+   data TEXT NOT NULL,
+   create_at INT,
+   modify_at INT
 )

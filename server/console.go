@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -46,9 +47,9 @@ func RunConsole() error {
 	wrapperRouter.GET("/user/info", func(ctx *gin.Context) {
 		ginHelper.Success(ctx, getCurrentUser(ctx))
 	})
-	wrapperRouter.POST("/delete/:table/:id", deleteData)
-	wrapperRouter.POST("/create/:table", createData)
-	wrapperRouter.POST("/modify/:table/:id", modifyData)
+	wrapperRouter.POST("/delete/:table/:id", deleteData, recordLog("delete"))
+	wrapperRouter.POST("/create/:table", createData, recordLog("create"))
+	wrapperRouter.POST("/modify/:table/:id", modifyData, recordLog("modify"))
 	wrapperRouter.GET("/query/:table", queryData)
 	wrapperRouter.GET("/env/list", func(ctx *gin.Context) {
 		ginHelper.Success(ctx, container.GetAppConfig().EnvList)
@@ -112,6 +113,7 @@ func createData(ctx *gin.Context) {
 	if result.Error != nil {
 		ginHelper.Failure(ctx, -1, result.Error.Error())
 	} else {
+		ctx.Set("data_id", reflect.ValueOf(result).FieldByName("id").Int())
 		ginHelper.Success(ctx, value)
 	}
 }
@@ -221,4 +223,28 @@ func userLogin(ctx *gin.Context) {
 		"token":  token,
 		"domain": domain,
 	})
+}
+
+func recordLog(action string) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		table := getTable(ctx)
+		log := model.Log{
+			Action: action,
+			Table:  table,
+		}
+		if action == "delete" || action == "modify" {
+			log.DataID = getDataID(ctx)
+		} else if value, exists := ctx.Get("data_id"); exists {
+			log.DataID, _ = value.(int64)
+		}
+		object := []map[string]interface{}{}
+		db := container.GetModelDB()
+		db.Table(log.Table).Where("id = ?", log.DataID).Find(&object)
+		if len(object) > 0 {
+			bytes, _ := json.Marshal(object)
+			log.Data = string(bytes)
+		}
+		db.Create(&log)
+	}
+
 }
