@@ -105,7 +105,12 @@ func createData(ctx *gin.Context) {
 	if result.Error != nil {
 		ginHelper.Failure(ctx, -1, result.Error.Error())
 	} else {
-		ctx.Set("data_id", extractID(value))
+		dataID := extractID(value)
+		ctx.Set("data_id", dataID)
+		db.Table(getTable(ctx)).Where(map[string]interface{}{"id": dataID}).Updates(map[string]interface{}{
+			"create_at": time.Now().Unix(),
+			"modify_at": time.Now().Unix(),
+		})
 		ginHelper.Success(ctx, value)
 	}
 }
@@ -117,6 +122,7 @@ func modifyData(ctx *gin.Context) {
 	}
 	db := container.GetModelDB()
 	updateData := ginHelper.AllPostParams(ctx)
+	updateData["modify_at"] = time.Now().Unix()
 	result := db.Table(getTable(ctx)).Where(map[string]interface{}{"id": getDataID(ctx)}).Updates(updateData)
 	if result.Error != nil {
 		ginHelper.Failure(ctx, -1, result.Error.Error())
@@ -200,7 +206,8 @@ func recordLog(action string) gin.HandlerFunc {
 		log := model.Log{
 			Action:   action,
 			Table:    table,
-			CreateAt: time.Now().Format("2006-01-02 15:04:05"),
+			CreateAt: time.Now().Unix(),
+			ModifyAt: time.Now().Unix(),
 		}
 		if action == "delete" || action == "modify" {
 			log.DataID = getDataID(ctx)

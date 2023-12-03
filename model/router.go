@@ -29,6 +29,8 @@ type Router struct {
 	Response    string `json:"response"`
 	Status      int    `json:"status"`
 	Description string `json:"description"`
+	CreateAt    int64  `json:"create_at"`
+	ModifyAt    int64  `json:"modify_at"`
 }
 
 func (Router) TableName() string {

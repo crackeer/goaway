@@ -6,6 +6,8 @@ type User struct {
 	Username    string `json:"username"`
 	PasswordMD5 string `json:"password_md5"`
 	UserType    string `json:"user_type"`
+	CreateAt    int64  `json:"create_at"`
+	ModifyAt    int64  `json:"modify_at"`
 }
 
 func (User) TableName() string {

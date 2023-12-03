@@ -17,6 +17,8 @@ type ServiceAPI struct {
 	Service     string `json:"service"`
 	Description string `json:"description"`
 	Timeout     int64  `json:"timeout"`
+	CreateAt    int64  `json:"create_at"`
+	ModifyAt    int64  `json:"modify_at"`
 }
 
 func (ServiceAPI) TableName() string {
@@ -39,6 +41,8 @@ type Service struct {
 	SignConfig     string `json:"sign_config"`
 	SuccessCode    string `json:"success_code"`
 	Timeout        int64  `json:"timeout"`
+	CreateAt       int64  `json:"create_at"`
+	ModifyAt       int64  `json:"modify_at"`
 }
 
 func (Service) TableName() string {
