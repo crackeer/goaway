@@ -14,6 +14,7 @@ import (
 	ginHelper "github.com/crackeer/gopkg/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/tidwall/gjson"
 )
 
 // LoginUser
@@ -120,4 +121,24 @@ func checkLogin(ctx *gin.Context) {
 		redirectLogin(ctx)
 		return
 	}
+}
+
+func extractID(data interface{}) int64 {
+	bytes, _ := json.Marshal(data)
+	return gjson.GetBytes(bytes, "id").Int()
+}
+
+// getCookieDomain
+//
+//	@param ctx
+//	@return string
+func getCookieDomain(ctx *gin.Context) string {
+	if ctx == nil {
+		return ""
+	}
+	host := ctx.Request.Host
+	if strings.Contains(host, ":") {
+		return strings.Split(host, ":")[0]
+	}
+	return host
 }

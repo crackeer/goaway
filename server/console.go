@@ -94,18 +94,10 @@ func createData(ctx *gin.Context) {
 
 	var (
 		table string = getTable(ctx)
-		err   error
 		value interface{}
 	)
-	switch table {
-	case "service":
-		value, err = bindService(ctx)
-	case "service_api":
-		value, err = bindServiceAPI(ctx)
-	case "router":
-		value, err = bindRouter(ctx)
-	}
-	if err != nil {
+	value, _ = model.NewModel(table)
+	if err := ctx.ShouldBindJSON(value); err != nil {
 		ginHelper.Failure(ctx, -1, err.Error())
 		return
 	}
@@ -113,32 +105,9 @@ func createData(ctx *gin.Context) {
 	if result.Error != nil {
 		ginHelper.Failure(ctx, -1, result.Error.Error())
 	} else {
-		ctx.Set("data_id", reflect.ValueOf(result).FieldByName("id").Int())
+		ctx.Set("data_id", extractID(value))
 		ginHelper.Success(ctx, value)
 	}
-}
-
-func bindService(ctx *gin.Context) (*model.Service, error) {
-	data := &model.Service{}
-	if err := ctx.ShouldBindJSON(data); err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-func bindServiceAPI(ctx *gin.Context) (*model.ServiceAPI, error) {
-	data := &model.ServiceAPI{}
-	if err := ctx.ShouldBindJSON(data); err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
-func bindRouter(ctx *gin.Context) (*model.Router, error) {
-	data := &model.Router{}
-	if err := ctx.ShouldBindJSON(data); err != nil {
-		return nil, err
-	}
-	return data, nil
 }
 
 func modifyData(ctx *gin.Context) {
@@ -217,7 +186,7 @@ func userLogin(ctx *gin.Context) {
 		ginHelper.Failure(ctx, -1, "generate token error:"+err.Error())
 		return
 	}
-	domain := ctx.Request.Host
+	domain := getCookieDomain(ctx)
 	ctx.SetCookie(tokenKey, token, 3600*24*365, "/", domain, true, false)
 	ginHelper.Success(ctx, map[string]interface{}{
 		"token":  token,
@@ -229,22 +198,20 @@ func recordLog(action string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		table := getTable(ctx)
 		log := model.Log{
-			Action: action,
-			Table:  table,
+			Action:   action,
+			Table:    table,
+			CreateAt: time.Now().Format("2006-01-02 15:04:05"),
 		}
 		if action == "delete" || action == "modify" {
 			log.DataID = getDataID(ctx)
 		} else if value, exists := ctx.Get("data_id"); exists {
 			log.DataID, _ = value.(int64)
 		}
-		object := []map[string]interface{}{}
+		object, _ := model.NewModel(log.Table)
 		db := container.GetModelDB()
-		db.Table(log.Table).Where("id = ?", log.DataID).Find(&object)
-		if len(object) > 0 {
-			bytes, _ := json.Marshal(object)
-			log.Data = string(bytes)
-		}
+		db.Table(log.Table).Where("id = ?", log.DataID).Find(object)
+		bytes, _ := json.Marshal(object)
+		log.Data = string(bytes)
 		db.Create(&log)
 	}
-
 }

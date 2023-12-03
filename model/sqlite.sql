@@ -13,11 +13,11 @@ CREATE TABLE service(
    data_key TEXT NOT NULL,
    success_code_key TEXT NOT NULL,
    description TEXT NOT NULL,
-   create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   modify_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   create_at INT,
+   modify_at INT
 );
 
-CREATE INDEX idx_service_env on service (service, env);
+CREATE UNIQUE INDEX idx_service_env on service (service, env);
 
 CREATE TABLE service_api(
    id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,11 +26,13 @@ CREATE TABLE service_api(
    path TEXT NOT NULL,
    method TEXT NOT NULL,
    content_type TEXT NOT NULL,
-   timeout int,
+   timeout INT,
    description TEXT NOT NULL,
-   create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   modify_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) CREATE INDEX idx_service_api on service_api (service, api);
+   create_at INT,
+   modify_at INT
+)
+
+CREATE INDEX idx_service_api on service_api (service, api);
 
 CREATE TABLE router (
    id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,12 +56,13 @@ CREATE TABLE user(
    modify_at INT
 )
 
-CREATE TABLE log(
-   id INTEGER PRIMARY KEY AUTOINCREMENT,
-   table TEXT NOT NULL,
-   action TEXT NOT NULL,
-   data_id TEXT NOT NULL,
-   data TEXT NOT NULL,
-   create_at INT,
-   modify_at INT
-)
+CREATE TABLE "log" (
+	"id" INTEGER NULL,
+	"table" TEXT NOT NULL,
+	"action" TEXT NOT NULL,
+	"data_id" TEXT NOT NULL,
+	"data" TEXT NOT NULL,
+	"create_at" INTEGER NULL,
+	"modify_at" INTEGER NULL,
+	PRIMARY KEY ("id")
+);

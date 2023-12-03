@@ -14,3 +14,9 @@ type Log struct {
 func (Log) TableName() string {
 	return "log"
 }
+
+func init() {
+	registerNewModelFunc("log", func() (interface{}, interface{}) {
+		return &Log{}, []Log{}
+	})
+}

@@ -9,6 +9,7 @@ import (
 )
 
 type ServiceAPI struct {
+	ID          int64  `json:"id"`
 	API         string `json:"api"`
 	ContentType string `json:"content_type"`
 	Method      string `json:"method"`
@@ -24,6 +25,7 @@ func (ServiceAPI) TableName() string {
 
 // Service
 type Service struct {
+	ID             int64  `json:"id"`
 	CodeKey        string `json:"code_key"`
 	DataKey        string `json:"data_key"`
 	Env            string `json:"env"`
@@ -112,4 +114,13 @@ func mergeServiceList(defaultServiceList, envServiceList []*Service) []*Service 
 		list = append(list, service)
 	}
 	return list
+}
+
+func init() {
+	registerNewModelFunc("service", func() (interface{}, interface{}) {
+		return &Service{}, []Service{}
+	})
+	registerNewModelFunc("service_api", func() (interface{}, interface{}) {
+		return &ServiceAPI{}, []ServiceAPI{}
+	})
 }

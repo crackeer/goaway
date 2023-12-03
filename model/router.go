@@ -19,6 +19,7 @@ type RouterConfig struct {
 
 // SqliteRouter
 type Router struct {
+	ID          int64  `json:"id"`
 	Mode        string `json:"mode"`
 	Category    string `json:"category"`
 	Path        string `json:"path"`
@@ -69,4 +70,10 @@ func GetRouterFromDB(db *gorm.DB) (map[string]*RouterConfig, error) {
 	}
 
 	return retData, nil
+}
+
+func init() {
+	registerNewModelFunc("router", func() (interface{}, interface{}) {
+		return &Router{}, []Router{}
+	})
 }

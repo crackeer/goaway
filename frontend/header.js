@@ -14,11 +14,11 @@ var header = `
         </div>
         <div class="collapse navbar-collapse" id="navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li><a href="/router/list.html">路由</a></li>
-                <li><a href="/service/list.html">服务</a></li>
+                <li><a href="/router/list.html" id="router-a">路由</a></li>
+                <li><a href="/service/list.html" id="service">服务</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="#">日志</a></li>
+                <li><a href="/log/list.html" id="log-a">日志</a></li>
                 <li class="dropdown">
                     <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="username">暂无<span class="caret"></span></a>
                     <ul class="dropdown-menu">

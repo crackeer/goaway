@@ -98,7 +98,7 @@
                                 <div class="col-sm-9">
                                     <select class="form-control" v-model="service.sign" @change="changeSignName">
                                         <option value="">无</option>
-                                        <option v-for="item in signList" :value="item.sign">{{item.sign_id}}</option>
+                                        <option v-for="item in signList" :value="item.sign_id">{{item.sign_id}}</option>
                                     </select>
                                 </div>
                             </div>
@@ -229,11 +229,10 @@
                     },
                     async changeSignName() {
                         for (var i in this.signList) {
-                            if (this.signList[i].sign == this.service.sign) {
-                                this.service.sign_config = JSON.stringify(this.signList[i].sign_config_template)
+                            if (this.signList[i].sign_id == this.service.sign) {
+                                this.service.sign_config = JSON.stringify(this.signList[i].config_template)
                             }
                         }
-                        console.log(this.service.sign, this.service.sign_config)
                         this.initJSONEditor()
                     },
                     async getServiceList() {

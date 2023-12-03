@@ -23,6 +23,9 @@ func init() {
 	routerCache = cache.New(20*time.Minute, 30*time.Minute)
 }
 
+// GetModelDB
+//
+//	@return *gorm.DB
 func GetModelDB() *gorm.DB {
 	return modelDB
 }

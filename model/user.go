@@ -23,3 +23,9 @@ func (user User) Map() map[string]interface{} {
 		"user_type":    user.UserType,
 	}
 }
+
+func init() {
+	registerNewModelFunc("user", func() (interface{}, interface{}) {
+		return &User{}, []User{}
+	})
+}
