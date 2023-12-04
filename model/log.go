@@ -7,6 +7,7 @@ type Log struct {
 	Table    string `json:"table"`
 	Data     string `json:"data"`
 	Action   string `json:"action"`
+	UserID   int64  `json:"user_id"`
 	CreateAt int64  `json:"create_at"`
 	ModifyAt int64  `json:"modify_at"`
 }

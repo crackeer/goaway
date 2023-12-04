@@ -104,15 +104,17 @@ func createData(ctx *gin.Context) {
 	result := db.Create(value)
 	if result.Error != nil {
 		ginHelper.Failure(ctx, -1, result.Error.Error())
-	} else {
-		dataID := extractID(value)
-		ctx.Set("data_id", dataID)
-		db.Table(getTable(ctx)).Where(map[string]interface{}{"id": dataID}).Updates(map[string]interface{}{
-			"create_at": time.Now().Unix(),
-			"modify_at": time.Now().Unix(),
-		})
-		ginHelper.Success(ctx, value)
+		return
 	}
+	dataID := extractID(value)
+	ctx.Set("data_id", dataID)
+	user := getCurrentUser(ctx)
+	db.Table(getTable(ctx)).Where(map[string]interface{}{"id": dataID}).Updates(map[string]interface{}{
+		"create_at": time.Now().Unix(),
+		"modify_at": time.Now().Unix(),
+		"user_id" : user.ID,
+	})
+	ginHelper.Success(ctx, value)
 }
 
 func modifyData(ctx *gin.Context) {
@@ -122,6 +124,9 @@ func modifyData(ctx *gin.Context) {
 	}
 	db := container.GetModelDB()
 	updateData := ginHelper.AllPostParams(ctx)
+	delete(updateData, "user_id")
+	delete(updateData, "env")
+	delete(updateData, "service")
 	updateData["modify_at"] = time.Now().Unix()
 	result := db.Table(getTable(ctx)).Where(map[string]interface{}{"id": getDataID(ctx)}).Updates(updateData)
 	if result.Error != nil {
@@ -203,11 +208,13 @@ func userLogin(ctx *gin.Context) {
 func recordLog(action string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		table := getTable(ctx)
+		user := getCurrentUser(ctx)
 		log := model.Log{
 			Action:   action,
 			Table:    table,
 			CreateAt: time.Now().Unix(),
 			ModifyAt: time.Now().Unix(),
+			UserID :  user.ID,
 		}
 		if action == "delete" || action == "modify" {
 			log.DataID = getDataID(ctx)
