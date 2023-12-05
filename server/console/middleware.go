@@ -91,3 +91,33 @@ func CheckAPILogin(ctx *gin.Context) {
 	}
 	ctx.Set("CurrentUser", loginUser.User)
 }
+
+// CheckPermission
+//
+//	@param ctx
+func CheckPermission(action string) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		user := GetCurrentUser(ctx)
+		if user.UserType == model.UserTypeRoot || ctx.Request.Method == http.MethodGet {
+			return
+		}
+
+		if user.UserType == model.UserTypeRead || user.UserType == model.UserTypeWrite {
+
+		} else {
+			ginHelper.Failure(ctx, -90, "user not allowed")
+			return
+		}
+
+		if user.UserType == model.UserTypeRead {
+			ginHelper.Failure(ctx, -90, "user not allowed")
+			return
+		}
+		if user.UserType == model.UserTypeWrite {
+			if action == "delete" {
+				ginHelper.Failure(ctx, -90, "user not allowed")
+				return
+			}
+		}
+	}
+}

@@ -40,9 +40,9 @@ func RunConsole() error {
 	wrapperRouter.GET("/user/info", func(ctx *gin.Context) {
 		ginHelper.Success(ctx, console.GetCurrentUser(ctx))
 	})
-	wrapperRouter.POST("/delete/:table/:id", console.Delete, console.RecordLog("delete"))
-	wrapperRouter.POST("/create/:table", console.Create, console.RecordLog("create"))
-	wrapperRouter.POST("/modify/:table/:id", console.Modify, console.RecordLog("modify"))
+	wrapperRouter.POST("/delete/:table/:id", console.CheckPermission("delete"), console.Delete, console.RecordLog("delete"))
+	wrapperRouter.POST("/create/:table", console.CheckPermission("create"), console.Create, console.RecordLog("create"))
+	wrapperRouter.POST("/modify/:table/:id", console.CheckPermission("modify"), console.Modify, console.RecordLog("modify"))
 	wrapperRouter.GET("/query/:table", console.Query)
 	wrapperRouter.GET("/env/list", func(ctx *gin.Context) {
 		ginHelper.Success(ctx, container.GetAppConfig().EnvList)

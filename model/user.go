@@ -1,5 +1,17 @@
 package model
 
+const (
+
+	// UserTypeRoot
+	UserTypeRoot string = "root"
+
+	// UserTypeRead
+	UserTypeRead string = "read"
+
+	// UserTypeWrite
+	UserTypeWrite string = "write"
+)
+
 // User
 type User struct {
 	ID          int64  `json:"id"`
@@ -15,8 +27,9 @@ func (User) TableName() string {
 }
 
 // Map
-//  @receiver user
-//  @return map
+//
+//	@receiver user
+//	@return map
 func (user User) Map() map[string]interface{} {
 	return map[string]interface{}{
 		"id":           user.ID,
