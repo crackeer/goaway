@@ -60,4 +60,4 @@ require (
 )
 
 // replace github.com/crackeer/simple_http => D:\\github\\simple_http
-replace github.com/crackeer/gopkg => D:\\github\\gopkg
+// replace github.com/crackeer/gopkg => D:\\github\\gopkg

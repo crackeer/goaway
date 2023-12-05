@@ -1,20 +1,21 @@
-package server
+package console
 
 import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strings"
-	"time"
 
 	"github.com/crackeer/goaway/container"
 	"github.com/crackeer/goaway/model"
-	ginHelper "github.com/crackeer/gopkg/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/tidwall/gjson"
+)
+
+var (
+	tokenKey string = "token"
 )
 
 // LoginUser
@@ -67,26 +68,11 @@ func calcMD5(str string) string {
 	return md5Str
 }
 
-func checkAPILogin(ctx *gin.Context) {
-
-	token, err := ctx.Cookie(tokenKey)
-	if err != nil {
-		ginHelper.Failure(ctx, -100, "user not login")
-		return
-	}
-	loginUser, err := parseJwt(token)
-	if err != nil {
-		ginHelper.Failure(ctx, -100, "user not login")
-		return
-	}
-	if loginUser.ExpiresAt > time.Now().Unix() {
-		ginHelper.Failure(ctx, -100, "user not login")
-		return
-	}
-	ctx.Set("CurrentUser", loginUser.User)
-}
-
-func getCurrentUser(ctx *gin.Context) model.User {
+// GetCurrentUser
+//
+//	@param ctx
+//	@return model.User
+func GetCurrentUser(ctx *gin.Context) model.User {
 	value, exist := ctx.Get("CurrentUser")
 	if !exist {
 		return model.User{}
@@ -95,32 +81,6 @@ func getCurrentUser(ctx *gin.Context) model.User {
 		return user
 	}
 	return model.User{}
-}
-
-func checkLogin(ctx *gin.Context) {
-	if !strings.HasSuffix(ctx.Request.URL.Path, ".html") || strings.HasSuffix(ctx.Request.URL.Path, "user/login.html") {
-		return
-	}
-
-	redirectLogin := func(ctx *gin.Context) {
-		ctx.Redirect(http.StatusTemporaryRedirect, "/user/login.html?jump="+ctx.Request.URL.Path)
-		ctx.Abort()
-	}
-
-	token, err := ctx.Cookie(tokenKey)
-	if err != nil {
-		redirectLogin(ctx)
-		return
-	}
-	loginUser, err := parseJwt(token)
-	if err != nil {
-		redirectLogin(ctx)
-		return
-	}
-	if loginUser.ExpiresAt > time.Now().Unix() {
-		redirectLogin(ctx)
-		return
-	}
 }
 
 func extractID(data interface{}) int64 {

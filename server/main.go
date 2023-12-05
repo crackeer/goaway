@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	"github.com/crackeer/goaway/container"
-	"github.com/crackeer/goaway/server/handler"
+	"github.com/crackeer/goaway/server/gateway"
 	giner "github.com/crackeer/gopkg/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/color"
@@ -64,7 +64,7 @@ func Run(ctx context.Context, port int64) error {
 	for path, apiFunc := range container.GetRouters() {
 		router.Any(path, apiFunc)
 	}
-	router.Any("proxy/*api", handler.Proxy)
-	router.NoRoute(handler.Handle)
+	router.Any("proxy/*api", gateway.Proxy)
+	router.NoRoute(gateway.Handle)
 	return router.Run(fmt.Sprintf(":%d", port))
 }

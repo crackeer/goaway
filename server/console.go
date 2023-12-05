@@ -1,24 +1,17 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/crackeer/goaway/container"
-	"github.com/crackeer/goaway/model"
+	"github.com/crackeer/goaway/server/console"
 	ginHelper "github.com/crackeer/gopkg/gin"
 	apiBase "github.com/crackeer/simple_http"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
-)
-
-var (
-	tokenKey string = "token"
 )
 
 func createStaticHandler(fs http.FileSystem) gin.HandlerFunc {
@@ -42,15 +35,15 @@ func RunConsole() error {
 	router := gin.New()
 	router.RedirectFixedPath = false
 	router.RedirectTrailingSlash = false
-	router.POST("/user/login", ginHelper.DoResponseJSON(), userLogin)
-	wrapperRouter := router.Group("", checkAPILogin, ginHelper.DoResponseJSON())
+	router.POST("/user/login", ginHelper.DoResponseJSON(), console.Login)
+	wrapperRouter := router.Group("", console.CheckAPILogin, ginHelper.DoResponseJSON())
 	wrapperRouter.GET("/user/info", func(ctx *gin.Context) {
-		ginHelper.Success(ctx, getCurrentUser(ctx))
+		ginHelper.Success(ctx, console.GetCurrentUser(ctx))
 	})
-	wrapperRouter.POST("/delete/:table/:id", deleteData, recordLog("delete"))
-	wrapperRouter.POST("/create/:table", createData, recordLog("create"))
-	wrapperRouter.POST("/modify/:table/:id", modifyData, recordLog("modify"))
-	wrapperRouter.GET("/query/:table", queryData)
+	wrapperRouter.POST("/delete/:table/:id", console.Delete, console.RecordLog("delete"))
+	wrapperRouter.POST("/create/:table", console.Create, console.RecordLog("create"))
+	wrapperRouter.POST("/modify/:table/:id", console.Modify, console.RecordLog("modify"))
+	wrapperRouter.GET("/query/:table", console.Query)
 	wrapperRouter.GET("/env/list", func(ctx *gin.Context) {
 		ginHelper.Success(ctx, container.GetAppConfig().EnvList)
 	})
@@ -58,95 +51,9 @@ func RunConsole() error {
 		ginHelper.Success(ctx, container.GetAppConfig().RouterCategory)
 	})
 	wrapperRouter.GET("/sign/list", getSignList)
-	router.Use(checkLogin)
+	router.Use(console.CheckLogin)
 	router.NoRoute(createStaticHandler(http.Dir(cfg.StaticDir)))
 	return router.Run(fmt.Sprintf(":%d", cfg.ConsolePort))
-}
-
-func getTable(ctx *gin.Context) string {
-	return ctx.Param("table")
-}
-
-func getDataID(ctx *gin.Context) int64 {
-	id := ctx.Param("id")
-	value, _ := strconv.Atoi(id)
-	return int64(value)
-}
-
-func deleteData(ctx *gin.Context) {
-	if dataID := getDataID(ctx); dataID < 1 {
-		ginHelper.Failure(ctx, -1, "data id = 0")
-		return
-	}
-	db := container.GetModelDB()
-	result := db.Exec(fmt.Sprintf("DELETE FROM %s where id = %d", getTable(ctx), getDataID(ctx)))
-	if result.Error != nil {
-		ginHelper.Failure(ctx, -1, result.Error.Error())
-	} else {
-		ginHelper.Success(ctx, map[string]interface{}{
-			"affected": result.RowsAffected,
-		})
-	}
-}
-
-func createData(ctx *gin.Context) {
-	db := container.GetModelDB()
-
-	var (
-		table string = getTable(ctx)
-		value interface{}
-	)
-	value, _ = model.NewModel(table)
-	if err := ctx.ShouldBindJSON(value); err != nil {
-		ginHelper.Failure(ctx, -1, err.Error())
-		return
-	}
-	result := db.Create(value)
-	if result.Error != nil {
-		ginHelper.Failure(ctx, -1, result.Error.Error())
-		return
-	}
-	dataID := extractID(value)
-	ctx.Set("data_id", dataID)
-	user := getCurrentUser(ctx)
-	db.Table(getTable(ctx)).Where(map[string]interface{}{"id": dataID}).Updates(map[string]interface{}{
-		"create_at": time.Now().Unix(),
-		"modify_at": time.Now().Unix(),
-		"user_id" : user.ID,
-	})
-	ginHelper.Success(ctx, value)
-}
-
-func modifyData(ctx *gin.Context) {
-	if dataID := getDataID(ctx); dataID < 1 {
-		ginHelper.Failure(ctx, -1, "data id = 0")
-		return
-	}
-	db := container.GetModelDB()
-	updateData := ginHelper.AllPostParams(ctx)
-	delete(updateData, "user_id")
-	delete(updateData, "env")
-	delete(updateData, "service")
-	updateData["modify_at"] = time.Now().Unix()
-	result := db.Table(getTable(ctx)).Where(map[string]interface{}{"id": getDataID(ctx)}).Updates(updateData)
-	if result.Error != nil {
-		ginHelper.Failure(ctx, -1, result.Error.Error())
-	} else {
-		ginHelper.Success(ctx, map[string]interface{}{
-			"affected": result.RowsAffected,
-		})
-	}
-}
-
-func queryData(ctx *gin.Context) {
-	var (
-		list []map[string]interface{}
-	)
-	db := container.GetModelDB()
-	query := ginHelper.AllGetParams(ctx)
-
-	db.Table(getTable(ctx)).Where(query).Order("id desc").Find(&list)
-	ginHelper.Success(ctx, list)
 }
 
 func getSignList(ctx *gin.Context) {
@@ -162,70 +69,4 @@ func getSignList(ctx *gin.Context) {
 		})
 	}
 	ginHelper.Success(ctx, retData)
-}
-
-type LoginForm struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-func userLogin(ctx *gin.Context) {
-	loginForm := &LoginForm{}
-	if err := ctx.ShouldBindJSON(loginForm); err != nil {
-		ginHelper.Failure(ctx, -1, err.Error())
-		return
-	}
-	user := &model.User{}
-	db := container.GetModelDB()
-	db.Model(&model.User{}).Where(map[string]interface{}{
-		"username": loginForm.Username,
-	}).First(user)
-	if user.ID < 1 {
-		ginHelper.Failure(ctx, -1, "user not found")
-		return
-	}
-
-	if !strings.EqualFold(calcMD5(loginForm.Password), user.PasswordMD5) {
-		ginHelper.Failure(ctx, -1, "password wrong")
-		return
-	}
-
-	expireAt := time.Now().Add(30 * 24 * time.Hour).Unix()
-
-	token, err := generateJwt(user, expireAt)
-	if err != nil {
-		ginHelper.Failure(ctx, -1, "generate token error:"+err.Error())
-		return
-	}
-	domain := getCookieDomain(ctx)
-	ctx.SetCookie(tokenKey, token, 3600*24*365, "/", domain, true, false)
-	ginHelper.Success(ctx, map[string]interface{}{
-		"token":  token,
-		"domain": domain,
-	})
-}
-
-func recordLog(action string) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		table := getTable(ctx)
-		user := getCurrentUser(ctx)
-		log := model.Log{
-			Action:   action,
-			Table:    table,
-			CreateAt: time.Now().Unix(),
-			ModifyAt: time.Now().Unix(),
-			UserID :  user.ID,
-		}
-		if action == "delete" || action == "modify" {
-			log.DataID = getDataID(ctx)
-		} else if value, exists := ctx.Get("data_id"); exists {
-			log.DataID, _ = value.(int64)
-		}
-		object, _ := model.NewModel(log.Table)
-		db := container.GetModelDB()
-		db.Table(log.Table).Where("id = ?", log.DataID).Find(object)
-		bytes, _ := json.Marshal(object)
-		log.Data = string(bytes)
-		db.Create(&log)
-	}
 }
