@@ -8,6 +8,15 @@ import (
 	"gorm.io/gorm"
 )
 
+func init() {
+	registerNewModelFunc("service", func() (interface{}, interface{}) {
+		return &Service{}, []Service{}
+	})
+	registerNewModelFunc("service_api", func() (interface{}, interface{}) {
+		return &ServiceAPI{}, []ServiceAPI{}
+	})
+}
+
 type ServiceAPI struct {
 	ID          int64  `json:"id"`
 	API         string `json:"api"`
@@ -120,11 +129,47 @@ func mergeServiceList(defaultServiceList, envServiceList []*Service) []*Service 
 	return list
 }
 
-func init() {
-	registerNewModelFunc("service", func() (interface{}, interface{}) {
-		return &Service{}, []Service{}
-	})
-	registerNewModelFunc("service_api", func() (interface{}, interface{}) {
-		return &ServiceAPI{}, []ServiceAPI{}
-	})
+// checkServiceCreate
+//
+//	@param db
+//	@param service
+//	@return error
+func checkServiceCreate(db *gorm.DB, service *Service) error {
+	tmp := &Service{}
+	if err := db.Model(&Service{}).Where(map[string]interface{}{
+		"service": service.Service,
+		"env":     service.Env,
+	}).First(tmp); err == nil && tmp.ID > 0 {
+		return fmt.Errorf("service `%s` in env `%s` exists", service.Service, service.Env)
+	}
+	return nil
+}
+
+// checkServiceModify
+//
+//	@param db
+//	@param service
+//	@return error
+func checkServiceModify(db *gorm.DB, service *Service) error {
+	tmp := &Service{}
+	if err := db.Model(&Service{}).Where("service = ? and env = ? and id != ?", service.Service, service.Env, service.ID).First(tmp); err == nil && tmp.ID > 0 {
+		return fmt.Errorf("service `%s` in env `%s` exists", service.Service, service.Env)
+	}
+	return nil
+}
+
+// checkServiceAPICreate
+//
+//	@param db
+//	@param api
+//	@return error
+func checkServiceAPICreate(db *gorm.DB, api *ServiceAPI) error {
+	tmp := &ServiceAPI{}
+	if err := db.Model(&Service{}).Where(map[string]interface{}{
+		"service": api.Service,
+		"api":     api.API,
+	}).First(tmp); err == nil && tmp.ID > 0 {
+		return fmt.Errorf("service_api `%s` in `%s` exists", api.API, api.Service)
+	}
+	return nil
 }

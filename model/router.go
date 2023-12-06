@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"gorm.io/gorm"
@@ -72,6 +73,34 @@ func GetRouterFromDB(db *gorm.DB) (map[string]*RouterConfig, error) {
 	}
 
 	return retData, nil
+}
+
+// checkRouterCreate
+//
+//	@param db
+//	@param router
+//	@return error
+func checkRouterCreate(db *gorm.DB, router *Router) error {
+	tmp := &Router{}
+	if err := db.Model(&Router{}).Where(map[string]interface{}{
+		"path": router.Path,
+	}).First(tmp); err == nil && tmp.ID > 0 {
+		return fmt.Errorf("path `%s` exists", tmp.Path)
+	}
+	return nil
+}
+
+// checkRouterModify
+//
+//	@param db
+//	@param router
+//	@return error
+func checkRouterModify(db *gorm.DB, router *Router) error {
+	tmp := &Router{}
+	if err := db.Model(&Router{}).Where("path = ? and id != ?", router.Path, router.ID).First(tmp); err == nil && tmp.ID > 0 {
+		return fmt.Errorf("path `%s` exists", router.Path)
+	}
+	return nil
 }
 
 func init() {

@@ -10,8 +10,8 @@ var locker *sync.Mutex = &sync.Mutex{}
 
 // registerNewModelFunc
 //
-//  @param table
-//  @param someFunc
+//	@param table
+//	@param someFunc
 func registerNewModelFunc(table string, someFunc NewModelFunc) {
 	locker.Lock()
 	defer locker.Unlock()

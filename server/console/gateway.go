@@ -21,6 +21,9 @@ func getDataID(ctx *gin.Context) int64 {
 	return int64(value)
 }
 
+// Create
+//
+//	@param ctx
 func Create(ctx *gin.Context) {
 	db := container.GetModelDB()
 	var (
