@@ -97,41 +97,29 @@ func CheckAPILogin(ctx *gin.Context) {
 //
 //	@param ctx
 func CheckPermission(action string) gin.HandlerFunc {
-	mapping := map[string]map[string]string{
-		"router": map[string]string{
-			"create": "writer",
-			"modify": "writer",
-			"query":  "writer,reader",
-		},
-		"service": map[string]string{
-			"create": "writer",
-			"modify": "writer",
-			"query":  "writer,reader",
-		},
-		"service_api": map[string]string{
-			"create": "writer",
-			"modify": "writer",
-			"query":  "writer,reader",
-		},
+	mapping := map[string]string{
+		"writer:create": "router,service,service_api",
+		"writer:modify": "router,service,service_api",
+		"writer:query":  "router,service,service_api,log",
+		"reader:query":  "router,service,service_api,log",
 	}
 	return func(ctx *gin.Context) {
 		user := GetCurrentUser(ctx)
+
 		if user.UserType == model.UserTypeRoot {
 			return
 		}
 
-		permission, ok := mapping[ctx.Param("table")]; !ok {
+		key := fmt.Sprintf("%s:%s", user.UserType, action)
+		tableList, ok := mapping[key]
+		if !ok {
 			ginHelper.Failure(ctx, -90, "user not allowed")
-			return
-		}
-
-		userTypes, ok := permission[acaction]; !ok {
-			ginHelper.Failure(ctx, -90, "user not allowed")
+			ginHelper.ResponseJSON(ctx)
 			return
 		}
 		var allowed bool
-		for _, item ：= strings.Split(userTypes, ",") {
-			if item == user.UserType {
+		for _, v := range strings.Split(tableList, ",") {
+			if v == ctx.Param("table") {
 				allowed = true
 				break
 			}
@@ -139,6 +127,7 @@ func CheckPermission(action string) gin.HandlerFunc {
 
 		if !allowed {
 			ginHelper.Failure(ctx, -90, "user not allowed")
+			ginHelper.ResponseJSON(ctx)
 			return
 		}
 	}

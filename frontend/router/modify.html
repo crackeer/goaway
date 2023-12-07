@@ -219,9 +219,13 @@
                             'mode': this.router.mode,
                             'service_api': '',
                             'response': JSON.stringify(window.jsonEditor.get()),
-                            'header': JSON.stringify(window.jsonEditor2.get()),
-                            'input': JSON.stringify(window.jsonEditor1.get()),
                         }
+
+                        if(modifyData.mode != 'static')  {
+                            modifyData.header = JSON.stringify(window.jsonEditor2.get())
+                            modifyData['input'] = JSON.stringify(window.jsonEditor1.get())
+                        }
+
                         if (this.router.mode == 'relay') {
                             if (this.router.tmp_service.length < 1 || this.router.tmp_api.length < 1) {
                                 bootbox.alert('请选择转发的API')

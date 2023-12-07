@@ -34,11 +34,11 @@ func RunConsole() error {
 	cfg := container.GetAppConfig()
 	router := gin.New()
 	router.POST("/user/login", ginHelper.DoResponseJSON(), console.Login)
-	router.GET("/sign/list", getSignList)
-	router.GET("/env/list", func(ctx *gin.Context) {
+	router.GET("/sign/list", ginHelper.DoResponseJSON(), getSignList)
+	router.GET("/env/list", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
 		ginHelper.Success(ctx, container.GetAppConfig().EnvList)
 	})
-	router.GET("/router/category", func(ctx *gin.Context) {
+	router.GET("/router/category", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
 		ginHelper.Success(ctx, container.GetAppConfig().RouterCategory)
 	})
 

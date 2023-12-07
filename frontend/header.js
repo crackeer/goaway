@@ -56,8 +56,8 @@ var jsFile2 = [
 ]
 var userTypeMapping = {
     "root" : "超级管理员",
-    "normal" : "普通用户",
-    "read" : "只读用户"
+    "writer" : "普通用户",
+    "reader" : "只读用户"
 }
 document.addEventListener("DOMContentLoaded", async () => {
     loadStyles(styleFiles)
