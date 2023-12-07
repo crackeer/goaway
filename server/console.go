@@ -34,6 +34,7 @@ func RunConsole() error {
 	cfg := container.GetAppConfig()
 	router := gin.New()
 	router.POST("/user/login", ginHelper.DoResponseJSON(), console.Login)
+	router.GET("/user/logout", console.Logout)
 	router.GET("/sign/list", ginHelper.DoResponseJSON(), getSignList)
 	router.GET("/env/list", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
 		ginHelper.Success(ctx, container.GetAppConfig().EnvList)

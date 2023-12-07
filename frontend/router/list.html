@@ -105,7 +105,7 @@
                     async doDeleteRouter(id) {
                         let result = await axios.post('/delete/router/' + id)
                         if (result.data.code < 0) {
-                            alert(result.data.message)
+                            bootbox.alert(result.data.message)
                         } else {
                             simpleReload()
                         }

@@ -1,6 +1,7 @@
 package console
 
 import (
+	"net/http"
 	"strings"
 	"time"
 
@@ -60,6 +61,12 @@ func Login(ctx *gin.Context) {
 		"token":  token,
 		"domain": domain,
 	})
+}
+
+func Logout(ctx *gin.Context) {
+	domain := getCookieDomain(ctx)
+	ctx.SetCookie(tokenKey, "1", -1, "/", domain, true, false)
+	ctx.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
 // Register

@@ -303,7 +303,7 @@
 
                             let result = await axios.post('/modify/service/' + this.service.id, updateData)
                             if (result.data.code < 0) {
-                                alert(result.data.message)
+                                bootbox.alert(result.data.message)
                             } else {
                                 simpleReload()
                             }
@@ -326,7 +326,7 @@
 
                             let result = await axios.post('/create/service', insertData)
                             if (result.data.code < 0) {
-                                alert(result.data.message)
+                                bootbox.alert(result.data.message)
                             } else {
                                 simpleReload()
                             }
@@ -342,7 +342,7 @@
                     async doDeleteService(serviceID) {
                         let result = await axios.post('/delete/service/' + serviceID)
                         if (result.data.code < 0) {
-                            alert(result.data.message)
+                            bootbox.alert(result.data.message)
                         } else {
                             simpleReload()
                         }
@@ -370,7 +370,7 @@
 
                         let result = await axios.post('/create/service', insertData)
                         if (result.data.code < 0) {
-                            alert(result.data.message)
+                            bootbox.alert(result.data.message)
                         } else {
                             reloadWith({
                                 env: this.copyEnv,

@@ -113,7 +113,7 @@ func CheckPermission(action string) gin.HandlerFunc {
 		key := fmt.Sprintf("%s:%s", user.UserType, action)
 		tableList, ok := mapping[key]
 		if !ok {
-			ginHelper.Failure(ctx, -90, "user not allowed")
+			ginHelper.Failure(ctx, -90, "暂无权限")
 			ginHelper.ResponseJSON(ctx)
 			return
 		}
@@ -126,7 +126,7 @@ func CheckPermission(action string) gin.HandlerFunc {
 		}
 
 		if !allowed {
-			ginHelper.Failure(ctx, -90, "user not allowed")
+			ginHelper.Failure(ctx, -90, "暂无权限")
 			ginHelper.ResponseJSON(ctx)
 			return
 		}

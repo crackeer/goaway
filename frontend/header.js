@@ -15,7 +15,7 @@ var header = `
         <div class="collapse navbar-collapse" id="navbar-collapse-1">
             <ul class="nav navbar-nav">
                 <li><a href="/router/list.html" id="router-a">路由</a></li>
-                <li><a href="/service/list.html" id="service">服务</a></li>
+                <li><a href="/service/list.html" id="service-a">服务</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="/log/list.html" id="log-a">日志</a></li>
@@ -86,10 +86,6 @@ async function getLoginUser() {
         let userTypeName = userTypeMapping[window.USER.user_type]
         $('#username').html(userTypeName + '：' + window.USER.username + '<span class="caret"></span>')
     }
-}
-
-function showUser() {
-    alert(88)
 }
 
 
