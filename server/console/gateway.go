@@ -35,6 +35,10 @@ func Create(ctx *gin.Context) {
 		ginHelper.Failure(ctx, -1, err.Error())
 		return
 	}
+	if err := model.CheckModelCreate(db, value); err != nil {
+		ginHelper.Failure(ctx, -2, err.Error())
+		return
+	}
 	result := db.Create(value)
 	if result.Error != nil {
 		ginHelper.Failure(ctx, -1, result.Error.Error())
@@ -61,9 +65,12 @@ func Modify(ctx *gin.Context) {
 	}
 	db := container.GetModelDB()
 	updateData := ginHelper.AllPostParams(ctx)
-	delete(updateData, "user_id")
-	delete(updateData, "env")
-	delete(updateData, "service")
+	if newUpdateData, err := model.MakeModifyData(getTable(ctx), updateData); err != nil {
+		ginHelper.Failure(ctx, -1, err.Error())
+		return
+	} else {
+		updateData = newUpdateData
+	}
 	updateData["modify_at"] = time.Now().Unix()
 	result := db.Table(getTable(ctx)).Where(map[string]interface{}{"id": getDataID(ctx)}).Updates(updateData)
 	if result.Error != nil {

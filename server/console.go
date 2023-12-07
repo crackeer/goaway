@@ -33,9 +33,15 @@ func createStaticHandler(fs http.FileSystem) gin.HandlerFunc {
 func RunConsole() error {
 	cfg := container.GetAppConfig()
 	router := gin.New()
-	router.RedirectFixedPath = false
-	router.RedirectTrailingSlash = false
 	router.POST("/user/login", ginHelper.DoResponseJSON(), console.Login)
+	router.GET("/sign/list", getSignList)
+	router.GET("/env/list", func(ctx *gin.Context) {
+		ginHelper.Success(ctx, container.GetAppConfig().EnvList)
+	})
+	router.GET("/router/category", func(ctx *gin.Context) {
+		ginHelper.Success(ctx, container.GetAppConfig().RouterCategory)
+	})
+
 	wrapperRouter := router.Group("", console.CheckAPILogin, ginHelper.DoResponseJSON())
 	wrapperRouter.GET("/user/info", func(ctx *gin.Context) {
 		ginHelper.Success(ctx, console.GetCurrentUser(ctx))
@@ -43,14 +49,8 @@ func RunConsole() error {
 	wrapperRouter.POST("/delete/:table/:id", console.CheckPermission("delete"), console.Delete, console.RecordLog("delete"))
 	wrapperRouter.POST("/create/:table", console.CheckPermission("create"), console.Create, console.RecordLog("create"))
 	wrapperRouter.POST("/modify/:table/:id", console.CheckPermission("modify"), console.Modify, console.RecordLog("modify"))
-	wrapperRouter.GET("/query/:table", console.Query)
-	wrapperRouter.GET("/env/list", func(ctx *gin.Context) {
-		ginHelper.Success(ctx, container.GetAppConfig().EnvList)
-	})
-	wrapperRouter.GET("/router/category", func(ctx *gin.Context) {
-		ginHelper.Success(ctx, container.GetAppConfig().RouterCategory)
-	})
-	wrapperRouter.GET("/sign/list", getSignList)
+	wrapperRouter.GET("/query/:table", console.CheckPermission("query"), console.Query)
+	wrapperRouter.POST("user/register", console.Register)
 	router.Use(console.CheckLogin)
 	router.NoRoute(createStaticHandler(http.Dir(cfg.StaticDir)))
 	return router.Run(fmt.Sprintf(":%d", cfg.ConsolePort))

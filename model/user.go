@@ -6,10 +6,10 @@ const (
 	UserTypeRoot string = "root"
 
 	// UserTypeRead
-	UserTypeRead string = "read"
+	UserTypeReader string = "reader"
 
 	// UserTypeWrite
-	UserTypeWrite string = "write"
+	UserTypeWriter string = "writer"
 )
 
 // User

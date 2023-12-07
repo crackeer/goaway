@@ -2,6 +2,7 @@ package console
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -96,28 +97,49 @@ func CheckAPILogin(ctx *gin.Context) {
 //
 //	@param ctx
 func CheckPermission(action string) gin.HandlerFunc {
+	mapping := map[string]map[string]string{
+		"router": map[string]string{
+			"create": "writer",
+			"modify": "writer",
+			"query":  "writer,reader",
+		},
+		"service": map[string]string{
+			"create": "writer",
+			"modify": "writer",
+			"query":  "writer,reader",
+		},
+		"service_api": map[string]string{
+			"create": "writer",
+			"modify": "writer",
+			"query":  "writer,reader",
+		},
+	}
 	return func(ctx *gin.Context) {
 		user := GetCurrentUser(ctx)
-		if user.UserType == model.UserTypeRoot || ctx.Request.Method == http.MethodGet {
+		if user.UserType == model.UserTypeRoot {
 			return
 		}
 
-		if user.UserType == model.UserTypeRead || user.UserType == model.UserTypeWrite {
-
-		} else {
+		permission, ok := mapping[ctx.Param("table")]; !ok {
 			ginHelper.Failure(ctx, -90, "user not allowed")
 			return
 		}
 
-		if user.UserType == model.UserTypeRead {
+		userTypes, ok := permission[acaction]; !ok {
 			ginHelper.Failure(ctx, -90, "user not allowed")
 			return
 		}
-		if user.UserType == model.UserTypeWrite {
-			if action == "delete" {
-				ginHelper.Failure(ctx, -90, "user not allowed")
-				return
+		var allowed bool
+		for _, item ：= strings.Split(userTypes, ",") {
+			if item == user.UserType {
+				allowed = true
+				break
 			}
+		}
+
+		if !allowed {
+			ginHelper.Failure(ctx, -90, "user not allowed")
+			return
 		}
 	}
 }

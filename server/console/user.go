@@ -16,6 +16,13 @@ type LoginForm struct {
 	Password string `json:"password"`
 }
 
+// UserRegister
+type UserRegister struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	UserType string `json:"user_type"`
+}
+
 // Login
 //
 //	@param ctx
@@ -52,5 +59,36 @@ func Login(ctx *gin.Context) {
 	ginHelper.Success(ctx, map[string]interface{}{
 		"token":  token,
 		"domain": domain,
+	})
+}
+
+// Register
+//
+//	@param ctx
+func Register(ctx *gin.Context) {
+	currentUser := GetCurrentUser(ctx)
+	if currentUser.UserType != model.UserTypeRoot {
+		ginHelper.Failure(ctx, -1, "not allowed to register user")
+		return
+	}
+	registerUser := &UserRegister{}
+	if err := ctx.ShouldBindJSON(registerUser); err != nil {
+		ginHelper.Failure(ctx, -1, err.Error())
+		return
+	}
+	user := &model.User{
+		Username:    registerUser.Username,
+		UserType:    registerUser.UserType,
+		PasswordMD5: calcMD5(registerUser.Password),
+	}
+	db := container.GetModelDB()
+	if err := db.Create(&user).Error; err != nil {
+		ginHelper.Failure(ctx, -2, err.Error())
+		return
+	}
+
+	ginHelper.Success(ctx, map[string]interface{}{
+		"username":  registerUser.Username,
+		"user_type": registerUser.UserType,
 	})
 }

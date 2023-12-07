@@ -173,3 +173,16 @@ func checkServiceAPICreate(db *gorm.DB, api *ServiceAPI) error {
 	}
 	return nil
 }
+
+// checkServiceAPIModify ...
+//
+//	@param db
+//	@param api
+//	@return error
+func checkServiceAPIModify(db *gorm.DB, api *ServiceAPI) error {
+	tmp := &ServiceAPI{}
+	if err := db.Model(&Service{}).Where("service  = ? and api = ? and id != ", api.Service, api.API, api.ID).First(tmp); err == nil && tmp.ID > 0 {
+		return fmt.Errorf("service_api `%s` in `%s` exists", api.API, api.Service)
+	}
+	return nil
+}
