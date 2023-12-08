@@ -1,0 +1,26 @@
+{
+    "roles" : [
+        {
+            "role" : "admin",
+            "name" : "管理员",
+            "description" : "",
+            "superuser" : true
+        },
+        {
+            "role" : "normal",
+            "name" : "普通用户",
+            "description" : "普通用户"
+        },
+        {
+            "role" : "visitor",
+            "name" : "游客",
+            "description" : "游客，只能查看"
+        }
+    ],
+    "permissions" : {
+        "normal:create" : "router,service,service_api",
+        "normal:modify" : "router,service,service_api",
+        "normal:query" : "router,service,service_api,log",
+        "visitor:query" : "router,service,service_api,log"
+    }
+}
