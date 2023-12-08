@@ -14,7 +14,7 @@
     <template id="template">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3>Github地址</h3>
+                <h4>Github地址</h4>
             </div>
             <div class="panel-body">
                 <div style="font-size: 17px;"><a href="https://github.com/crackeer/goaway"
@@ -23,7 +23,7 @@
         </div>
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3>签名算法</h3>
+                <h4>签名算法</h4>
             </div>
             <div class="panel-body">
                 <table class="table">
@@ -66,6 +66,30 @@
                 </div>
             </div>
         </div>
+
+        <div class="panel panel-default" v-if="userList.length > 0">
+            <div class="panel-heading">
+                <h4>用户列表</h4>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>用户名</th>
+                            <th>用户类型</th>
+                            <th>创建时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, i) in userList">
+                            <td>{{item.username}}</td>
+                            <td>{{item.user_type}}</td>
+                            <td>{{item.create_at}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </template>
 </body>
 <script>
@@ -74,6 +98,7 @@
             data() {
                 return {
                     signList: [],
+                    userList: [],
                     signID: '',
                     signConfig: {},
                     signIntroduction: ""
@@ -82,6 +107,7 @@
             template: '#template',
             async mounted() {
                 this.getSignList()
+                this.getUserList()
             },
             methods: {
                 async getSignList() {
@@ -96,7 +122,12 @@
                         initByteMarkdownPreview("markdown", item.introduction)
                         initJSONEditor("jsoneditor", JSON.stringify(item.config_template))
                     }, 200)
-
+                },
+                async getUserList() {
+                    if(window.USER.user_type == "root") {
+                        let result = await axios.get("/query/user")
+                        this.userList = result.data.data
+                    }
                 }
             }
         })
@@ -110,6 +141,9 @@
     a:focus,
     a:visited {
         text-decoration: none;
+    }
+    .table {
+        margin-bottom: 0;
     }
 </style>
 

@@ -111,6 +111,6 @@ func Query(ctx *gin.Context) {
 	db := container.GetModelDB()
 	query := ginHelper.AllGetParams(ctx)
 
-	db.Table(getTable(ctx)).Where(query).Order("id desc").Find(&list)
+	db.Table(getTable(ctx)).Where(query).Order("id desc").Limit(1000).Find(&list)
 	ginHelper.Success(ctx, list)
 }

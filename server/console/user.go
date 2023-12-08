@@ -75,20 +75,27 @@ func Logout(ctx *gin.Context) {
 func Register(ctx *gin.Context) {
 	currentUser := GetCurrentUser(ctx)
 	if currentUser.UserType != model.UserTypeRoot {
-		ginHelper.Failure(ctx, -1, "not allowed to register user")
+		ginHelper.Failure(ctx, -1, "暂无权限创建")
 		return
 	}
 	registerUser := &UserRegister{}
 	if err := ctx.ShouldBindJSON(registerUser); err != nil {
-		ginHelper.Failure(ctx, -1, err.Error())
+		ginHelper.Failure(ctx, -2, err.Error())
 		return
 	}
+	db := container.GetModelDB()
+	tmpUser := model.User{}
+	if err := db.Model(&model.User{}).Where("username = ?", registerUser.Username).First(&tmpUser).Error; err == nil && tmpUser.ID > 0 {
+		ginHelper.Failure(ctx, -3, "用户已存在")
+		return
+	}
+
 	user := &model.User{
 		Username:    registerUser.Username,
 		UserType:    registerUser.UserType,
 		PasswordMD5: calcMD5(registerUser.Password),
 	}
-	db := container.GetModelDB()
+
 	if err := db.Create(&user).Error; err != nil {
 		ginHelper.Failure(ctx, -2, err.Error())
 		return

@@ -3,6 +3,15 @@ function getQuery(key, value) {
     return url.get(key) || value
 }
 
+function getAllQuery() {
+    let params = new URLSearchParams(window.location.search)
+    let retData = {}
+    for (let param of params) {
+        retData[param[0]] = param[1]
+    }
+    return retData
+}
+
 function pushStateWith(query) {
     let newURL = window.location.pathname + "?" + httpBuildQuery(query)
     window.history.pushState(null, "", newURL)
