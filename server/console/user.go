@@ -106,3 +106,57 @@ func Register(ctx *gin.Context) {
 		"user_type": registerUser.UserType,
 	})
 }
+
+type UserInfo struct {
+	Username        string `json:"username"`
+	Role            string `json:"role"`
+	RoleName        string `json:"role_name"`
+	Superuser       bool   `json:"superuser"`
+	RoleDescription string `json:"role_description"`
+}
+
+// GetUserInfo
+//
+//	@param ctx
+func GetUserInfo(ctx *gin.Context) {
+	user := GetCurrentUser(ctx)
+	permission := container.GetPermission()
+	userInfo := map[string]interface{}{
+
+		"username":         user.Username,
+		"role":             user.UserType,
+		"created_at":       user.CreateAt,
+		"role_name":        "暂无",
+		"superuser":        false,
+		"role_description": "",
+	}
+	for _, role := range permission.Roles {
+		if role.Role == user.UserType {
+			userInfo["role_name"] = role.Name
+			userInfo["superuser"] = role.Superuser
+			userInfo["role_description"] = role.Description
+			break
+		}
+	}
+	userPermission := map[string]string{}
+	for key, tables := range permission.Permissions {
+		parts := strings.Split(key, ":")
+		if parts[0] == user.UserType && len(parts) >= 2 {
+			userPermission[parts[1]] = tables
+		}
+	}
+	userInfo["permission"] = userPermission
+	ginHelper.Success(ctx, userInfo)
+}
+
+// FormateUser
+//
+//	@param user
+//	@return *UserInfo
+func FormateUser(user *model.User) *UserInfo {
+	retData := &UserInfo{
+		Username: user.Username,
+		Role:     user.UserType,
+	}
+	return retData
+}

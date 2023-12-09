@@ -66,3 +66,7 @@ func InitAppConfig() (*AppConfig, error) {
 func GetAppConfig() *AppConfig {
 	return config
 }
+
+func GetPermission() *Permission {
+	return permission
+}

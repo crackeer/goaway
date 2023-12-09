@@ -42,11 +42,12 @@ func RunConsole() error {
 	router.GET("/router/category", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
 		ginHelper.Success(ctx, container.GetAppConfig().RouterCategory)
 	})
+	router.GET("/role/list", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
+		ginHelper.Success(ctx, container.GetPermission().Roles)
+	})
 
 	wrapperRouter := router.Group("", console.CheckAPILogin, ginHelper.DoResponseJSON())
-	wrapperRouter.GET("/user/info", func(ctx *gin.Context) {
-		ginHelper.Success(ctx, console.GetCurrentUser(ctx))
-	})
+	wrapperRouter.GET("/user/info", console.GetUserInfo)
 	wrapperRouter.POST("/delete/:table/:id", console.CheckPermission("delete"), console.Delete, console.RecordLog("delete"))
 	wrapperRouter.POST("/create/:table", console.CheckPermission("create"), console.Create, console.RecordLog("create"))
 	wrapperRouter.POST("/modify/:table/:id", console.CheckPermission("modify"), console.Modify, console.RecordLog("modify"))
